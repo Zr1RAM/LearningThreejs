@@ -1,0 +1,4 @@
+I'll be dropping all my notes / cheat sheet here for threejs here
+gui.add to add parameters so that you can test and view stuff in the scene...
+basically gives you unity scene view like functionality except you have to input the values 
+or slide them 

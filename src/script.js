@@ -3,6 +3,10 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
 
+//Texture loader 
+const textureLoader = new THREE.TextureLoader()
+
+const NormalMapTexture = textureLoader.load('/textures/N_Sample.jpg')
 // Debug
 const gui = new dat.GUI()
 
@@ -17,21 +21,45 @@ const geometry = new THREE.TorusGeometry( .7, .2, 16, 100 );
 
 // Materials
 
-const material = new THREE.MeshBasicMaterial()
-material.color = new THREE.Color(0xff0000)
+const material = new THREE.MeshStandardMaterial()
+material.metalness = 0.3
+material.roughness = 0.3
+material.normalMap = NormalMapTexture
+material.color = new THREE.Color(0x0000ff)
 
 // Mesh
-const sphere = new THREE.Mesh(geometry,material)
-scene.add(sphere)
-
+const torus = new THREE.Mesh(geometry,material)
+scene.add(torus)
+console.log(torus.position)
 // Lights
 
-const pointLight = new THREE.PointLight(0xffffff, 0.1)
-pointLight.position.x = 2
-pointLight.position.y = 3
-pointLight.position.z = 4
+const pointLight = new THREE.PointLight(0xffffff, 1)
+pointLight.position.x = -1
+pointLight.position.y = 2
+pointLight.position.z = 1
 scene.add(pointLight)
 
+const pointLight2 = new THREE.PointLight(0xff0000, 1)
+pointLight2.position.set(-0.294,-0.069,-1.587)
+scene.add(pointLight2)
+
+const pointLight2GUIFolder = gui.addFolder('PointLight 2')
+pointLight2GUIFolder.add(pointLight2.position, 'x').min(-10 ).max(10).step(0.001)
+pointLight2GUIFolder.add(pointLight2.position, 'y').min(-10 ).max(10).step(0.001)
+pointLight2GUIFolder.add(pointLight2.position, 'z').min(-10 ).max(10).step(0.001)
+
+const pointLightHelper = new THREE.PointLightHelper(pointLight2,1)
+scene.add(pointLightHelper)
+const pointLightHelper2 = new THREE.PointLightHelper(pointLight,1)
+scene.add(pointLightHelper2)
+
+const light2Color = {
+    color: 0xff0000
+}
+
+pointLight2GUIFolder.addColor(light2Color, 'color').onChange(() => {
+    pointLight2.color.set(light2Color.color)
+})
 /**
  * Sizes
  */
@@ -39,6 +67,8 @@ const sizes = {
     width: window.innerWidth,
     height: window.innerHeight
 }
+
+//Event Listeners
 
 window.addEventListener('resize', () =>
 {
@@ -54,6 +84,21 @@ window.addEventListener('resize', () =>
     renderer.setSize(sizes.width, sizes.height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 })
+
+document.addEventListener('mousemove', onDocumentMouseMove)
+
+let mouseX = 0
+let mouseY = 0
+let targetX = 0 
+let targetY = 0
+
+const windowHalfX = window.innerWidth
+const windowHalfY = window.innerHeight
+
+function onDocumentMouseMove(event) {
+    mouseX = (event.clientX - windowHalfX)
+    mouseY = (event.clientY - windowHalfY)
+}
 
 /**
  * Camera
@@ -73,7 +118,8 @@ scene.add(camera)
  * Renderer
  */
 const renderer = new THREE.WebGLRenderer({
-    canvas: canvas
+    canvas: canvas,
+    alpha: true
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -87,10 +133,16 @@ const clock = new THREE.Clock()
 const tick = () =>
 {
 
+    targetX = mouseX * 0.001
+    targetY = mouseY * 0.001
     const elapsedTime = clock.getElapsedTime()
 
     // Update objects
-    sphere.rotation.y = .5 * elapsedTime
+    torus.rotation.y = .5 * elapsedTime
+
+    torus.rotation.y += 0.5 * (targetX - torus.rotation.y)    
+    torus.rotation.x += 0.5 * (targetY - torus.rotation.x)
+    torus.rotation.z += -0.5 * (targetY - torus.rotation.x)
 
     // Update Orbital Controls
     // controls.update()
