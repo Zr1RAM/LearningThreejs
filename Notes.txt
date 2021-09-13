@@ -3,7 +3,7 @@ gui.add to add parameters so that you can test and view stuff in the scene...
 basically gives you unity scene view like functionality except you have to input the values 
 or slide them 
 
-// good references for threejs particle systems to usage
+// good references for threejs particle systems usage
 http://squarefeet.github.io/ShaderParticleEngine/
 
 http://stemkoski.blogspot.com/2013/06/creating-particle-effects-engine-in.html
@@ -12,6 +12,8 @@ https://github.com/RonenNess/partykals
 
 https://aerotwist.com/tutorials/creating-particles-with-three-js/
 
+https://sbcode.net/threejs/geometry-to-buffergeometry/
+
 // good references for threejs particle systems to usage
 
 
@@ -19,3 +21,29 @@ Indentation — Format Selection (Ctrl+K Ctrl+F)
 
 
 always add script tag in the end of the body as it is good practice and also because it takes long to load
+
+Notes from the particle system video from DesignCourse (three js tutorial series this proj is based on) youtube video : https://www.youtube.com/watch?v=dLYMzNmILQA&t=67s  
+    - 3 step process. Declare the geometry, Materials finally mesh = geometry + Materials 
+    - if you want to create a particle system with existing geometry eg,
+        const geometry = new THREE.TorusGeometry(the parameters);
+        const material = new THREE.PointsMaterial({
+            size: 0.005
+        })
+        const PS_Torus = new THREE.Points(geometry,material);
+        scene.add(PS_Torus);
+    - if you want to create a particle system with custom randomized vertex positions / create your own geometry
+        eg,
+        const particlesGeometry = new THREE.BufferGeometry;
+        const particlesCount = 50000;
+        const posArray = new Float32Array(particlesCount * 3);
+        //float32arrays saves values in "xyz, xyz , xyz, xyz,....." manner
+        for(let i = 0 ; i < particlesCount ; i++) {
+            posArray[i] = (Mathf.random() - 0.5);
+        }
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3))
+        const particleMaterial = new THREE.PointsMaterial({
+            size : 0.005,
+            map: (loaded texture variable goes here), // particle texture goes here
+            transparent: true,
+            color: 'blue'
+        })
