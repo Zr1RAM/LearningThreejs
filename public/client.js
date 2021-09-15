@@ -2,7 +2,10 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import Stats from 'three/examples/jsm/libs/stats.module'
 import { GUI } from 'three/examples/jsm/libs/dat.gui.module'
+//import { readFileFromPath } from './FileReader'
+//import * as fs from 'fs'
 
+THREE.Cache.enabled = true;
 const scene = new THREE.Scene()
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100)
@@ -46,13 +49,15 @@ const cameraFolder = gui.addFolder('Camera')
 cameraFolder.add(camera.position, 'z', 0, 10)
 cameraFolder.open()
 
+// This is the tick function
 function animate() {
-    requestAnimationFrame(animate)
+    
     cube.rotation.x += 0.01
     cube.rotation.y += 0.01
     controls.update()
     render()
     stats.update()
+    requestAnimationFrame(animate)
 }
 
 function render() {
@@ -60,3 +65,84 @@ function render() {
 }
 
 animate()
+
+//testing file reading
+// readFileFromPath('./JSONs/OfficeFiles/officejsonfile1.json', (data)=> {
+//     console.log(data);
+// });
+
+let loader;
+function JSONLoader(path, callback) {
+    if(!loader) {
+        loader = new THREE.FileLoader();
+    }
+    loader.load(
+        // resource URL
+        path,
+    
+        // onLoad callback
+        function ( data ) {
+            callback(data);
+        },
+    
+        // onProgress callback
+        function ( xhr ) {
+            console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+        },
+    
+        // onError callback
+        function ( err ) {
+            console.error( 'An error happened' );
+        }
+    );
+}
+// loader = new THREE.FileLoader();
+// loader.load(
+//     // resource URL
+//     '/JSONs/OfficeFiles/officejsonfile1.json',
+
+//     // onLoad callback
+//     function (data) {
+//         // output the text to the console
+//         console.log(data);
+//         console.log(typeof data);
+//         //callback(data);
+//     },
+
+//     // onProgress callback
+//     function (xhr) {
+//         console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+//     },
+
+//     // onError callback
+//     function (err) {
+//         console.error('An error happened');
+//     }
+// );
+// const fs = require('fs');
+
+// fs.readdir('/JSONs/OfficeFiles/', (err, files) => {
+//   files.forEach(file => {
+//     console.log(file);
+//   });
+// });
+//testing file reading
+
+// Setting actor transforms
+
+function setEgoParameters(data)
+{
+    //console.log(data);
+    let ParsedJSONObj = JSON.parse(data);
+    
+    // if(ParsedJSONObj.messages.ego) {
+    //     console.log("I think this means it is an automated vehicle");
+    // } else if (ParsedJSONObj.messages.lanes) {
+    //     console.log("This is for lanes");
+    // }
+    switch(ParsedJSONObj) {
+        
+    }
+}
+JSONLoader('/JSONs/OfficeFiles/officejsonfile1.json',setEgoParameters);
+// Setting actor transforms
