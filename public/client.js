@@ -135,14 +135,14 @@ function setEgoParameters(data)
     //console.log(data);
     let ParsedJSONObj = JSON.parse(data);
     
-    // if(ParsedJSONObj.messages.ego) {
-    //     console.log("I think this means it is an automated vehicle");
-    // } else if (ParsedJSONObj.messages.lanes) {
-    //     console.log("This is for lanes");
-    // }
-    switch(ParsedJSONObj) {
-        
+    if(ParsedJSONObj.messages.ego) {
+        console.log("I think this means it is an automated vehicle");
+    } else if (ParsedJSONObj.messages.lanes) {
+        console.log("This is for lanes");
     }
+    // switch(ParsedJSONObj) {
+
+    // }
 }
 JSONLoader('/JSONs/OfficeFiles/officejsonfile1.json',setEgoParameters);
 // Setting actor transforms
