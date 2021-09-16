@@ -7,23 +7,25 @@ import { GUI } from 'three/examples/jsm/libs/dat.gui.module'
 
 THREE.Cache.enabled = true;
 const scene = new THREE.Scene()
-
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100)
+scene.background = new THREE.Color( "rgb(75, 75, 75)" );
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
 camera.position.z = 2
-
-const renderer = new THREE.WebGLRenderer()
+const renderer = new THREE.WebGLRenderer( { antialias: true } );
 renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.physicallyCorrectLights = true;
 
 const controls = new OrbitControls(camera, renderer.domElement)
 
-const geometry = new THREE.BoxGeometry()
-const material = new THREE.MeshBasicMaterial({
-    color: 0x00ff00,
-    wireframe: true,
-})
-const cube = new THREE.Mesh(geometry, material)
-scene.add(cube)
+// const geometry = new THREE.BoxGeometry()
+// const material = new THREE.MeshBasicMaterial({
+//     color: 0x00ff00,
+//     wireframe: true,
+// })
+// const cube = new THREE.Mesh(geometry, material)
+// scene.add(cube)
 
 window.addEventListener(
     'resize',
@@ -40,20 +42,20 @@ const stats = Stats()
 document.body.appendChild(stats.dom)
 
 const gui = new GUI()
-const cubeFolder = gui.addFolder('Cube')
-cubeFolder.add(cube.scale, 'x', -5, 5)
-cubeFolder.add(cube.scale, 'y', -5, 5)
-cubeFolder.add(cube.scale, 'z', -5, 5)
-cubeFolder.open()
+// const cubeFolder = gui.addFolder('Cube')
+// cubeFolder.add(cube.scale, 'x', -5, 5)
+// cubeFolder.add(cube.scale, 'y', -5, 5)
+// cubeFolder.add(cube.scale, 'z', -5, 5)
+// cubeFolder.open()
 const cameraFolder = gui.addFolder('Camera')
-cameraFolder.add(camera.position, 'z', 0, 10)
+cameraFolder.add(camera.position, 'y', 0, 10)
 cameraFolder.open()
 
 // This is the tick function
 function animate() {
     
-    cube.rotation.x += 0.01
-    cube.rotation.y += 0.01
+    // cube.rotation.x += 0.01
+    // cube.rotation.y += 0.01
     controls.update()
     render()
     stats.update()
@@ -130,19 +132,88 @@ function JSONLoader(path, callback) {
 
 // Setting actor transforms
 
-function setEgoParameters(data)
+function setActorParameters(data)
 {
     //console.log(data);
     let ParsedJSONObj = JSON.parse(data);
     
     if(ParsedJSONObj.messages.ego) {
-        console.log("I think this means it is an automated vehicle");
+        setEgoParameters(ParsedJSONObj.messages);
     } else if (ParsedJSONObj.messages.lanes) {
-        console.log("This is for lanes");
+        setLaneParameters(ParsedJSONObj.messages.lanes);
     }
-    // switch(ParsedJSONObj) {
-
+    // console.log(Object.keys(ParsedJSONObj));
+    // switch (ParsedJSONObj) {
+    //     case JSON.stringify(ParsedJSONObj.messages.ego):
+    //         console.log("I think this means it is an automated vehicle");
+    //         break;
+    //     case JSON.stringify(ParsedJSONObj.messages.lanes):
+    //         console.log("This is for lanes");
+    //         break;
     // }
 }
-JSONLoader('/JSONs/OfficeFiles/officejsonfile1.json',setEgoParameters);
+
+function setEgoParameters(data) {
+    setEgoTransform(data.ego);
+    if(data.objects) {
+        setIdentifiedObjectParameters(data.objects);
+    }
+}
+let egoVehicle;
+function setEgoTransform(data)
+{
+    if(!egoVehicle) {
+        egoVehicle = SpawnEgoVehicle();
+        //egoVehicle = scene.getObjectByName( "egoVehicle" );
+    }
+    egoVehicle.position.set( data.pos_x_m, data.pos_z_m, data.pos_y_m );
+    egoVehicle.rotation.y = data.ori_yaw_rad;
+    console.log(egoVehicle.position);
+    updateCameraTransform(egoVehicle);
+}
+
+function SpawnEgoVehicle()
+{
+    const geometry = new THREE.BoxGeometry();
+    const material = new THREE.MeshBasicMaterial({
+        color: 0x00ff00,
+        wireframe: true,
+    });
+    const egoVehicleActor = new THREE.Mesh(geometry, material);
+    egoVehicleActor.name = "egoVehicle";
+    scene.add(egoVehicleActor);
+    return egoVehicleActor;
+}
+function updateCameraTransform(targetActor) {
+    camera.position.set(targetActor.position.x , targetActor.position.y + 5, targetActor.position.z);
+    camera.lookAt(targetActor.position);
+    controls.target = targetActor.position;
+}
+
+function setIdentifiedObjectParameters(data) {
+    const geometry = new THREE.BoxGeometry();
+    const material = new THREE.MeshBasicMaterial({
+        color: 0x0000ff,
+        wireframe: true,
+    });
+    //let TrackedObject;
+    for (let i = 0 ; i < data.length ; i++) {
+        const TrackedObject = new THREE.Mesh(geometry, material);
+        TrackedObject.name = "obj" + data[i].id;
+        scene.add(TrackedObject);
+        TrackedObject.position.set(egoVehicle.position.x + data[i].kinematics.pos_x_m, 
+                                   egoVehicle.position.y + data[i].kinematics.pos_z_m, 
+                                   egoVehicle.position.z + data[i].kinematics.pos_y_m);
+        TrackedObject.scale.set(data[i].dimensions.width_m , 1, data[i].dimensions.length_m);
+    }
+}
+
+
+
+function setLaneParameters(data) {
+    
+}
+
+
+JSONLoader('/JSONs/OfficeFiles/officejsonfile1.json',setActorParameters);
 // Setting actor transforms
