@@ -172,8 +172,8 @@ function setEgoTransform(data)
         egoVehicle = SpawnEgoVehicle();
         //egoVehicle = scene.getObjectByName( "egoVehicle" );
     }
-    //egoVehicle.position.set( data.pos_x_m, data.pos_z_m, data.pos_y_m );
-    egoVehicle.position.set( 0,0,0 );
+    egoVehicle.position.set( data.pos_x_m, data.pos_z_m, data.pos_y_m );
+    grid.position.set(data.pos_x_m, grid.position.y, data.pos_y_m);
     egoVehicle.rotation.y = data.ori_yaw_rad;
     console.log(egoVehicle.position);
     updateCameraTransform(egoVehicle);
