@@ -2,12 +2,18 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import Stats from 'three/examples/jsm/libs/stats.module'
 import { GUI } from 'three/examples/jsm/libs/dat.gui.module'
+import { Mesh } from 'three';
+
 //import { readFileFromPath } from './FileReader'
 //import * as fs from 'fs'
 
 THREE.Cache.enabled = true;
 const scene = new THREE.Scene()
 scene.background = new THREE.Color( "rgb(75, 75, 75)" );
+const grid = new THREE.GridHelper(10000, 5000);
+scene.add(grid);
+grid.position.y = -0.5;
+
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
 camera.position.z = 2
 const renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -166,7 +172,8 @@ function setEgoTransform(data)
         egoVehicle = SpawnEgoVehicle();
         //egoVehicle = scene.getObjectByName( "egoVehicle" );
     }
-    egoVehicle.position.set( data.pos_x_m, data.pos_z_m, data.pos_y_m );
+    //egoVehicle.position.set( data.pos_x_m, data.pos_z_m, data.pos_y_m );
+    egoVehicle.position.set( 0,0,0 );
     egoVehicle.rotation.y = data.ori_yaw_rad;
     console.log(egoVehicle.position);
     updateCameraTransform(egoVehicle);
@@ -192,9 +199,10 @@ function updateCameraTransform(targetActor) {
 
 function setIdentifiedObjectParameters(data) {
     const geometry = new THREE.BoxGeometry();
-    const material = new THREE.MeshBasicMaterial({
+    const material = new THREE.MeshPhongMaterial({
         color: 0x0000ff,
-        wireframe: true,
+        opacity: 0.5,
+        transparent: true,
     });
     //let TrackedObject;
     for (let i = 0 ; i < data.length ; i++) {
@@ -217,3 +225,5 @@ function setLaneParameters(data) {
 
 JSONLoader('/JSONs/OfficeFiles/officejsonfile1.json',setActorParameters);
 // Setting actor transforms
+
+
