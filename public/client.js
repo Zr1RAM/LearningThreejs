@@ -230,19 +230,25 @@ function setLaneParameters(data) {
 
 function PSPointCloud(data) {
     data = JSON.parse(data);
-    console.log(data[0].position[0]);
     const PSgeometry = new THREE.BufferGeometry;
     const particlesCount = data.length;
 
-    const posArray = new Float32Array(particlesCount);
+    const posArray = new Float32Array(particlesCount * 3);
+    // xyz xyz xyz xyz.....
     for(let i = 0 ; i < posArray.length ; i++) {
-        
+        posArray[i * 3] = data[i].position[0];
+        posArray[i * 3 + 1] = data[i].position[1];
+        posArray[i * 3 + 2] = data[i].position[2];
+        // let particle = new THREE.Vector3(data[i].position[0], data[i].position[1], data[i].position[2]);
+        // particlePositions.push(particle);
        // console.log(data[i]);
     }
+    PSgeometry.setAttribute( 'position', new THREE.BufferAttribute( posArray, 3 ) );
     const PSmaterial = new THREE.PointsMaterial({
         size: 0.005
     });
-    //const pointCloud_PS = THREE.Points(PSgeometry,PSmaterial);
+    const pointCloud_PS = THREE.Points(PSgeometry,PSmaterial);
+    scene.add(pointCloud_PS);
 }
 JSONLoader('/JSONs/samplepointcloud.json',PSPointCloud);
 //Particle System Point Cloud 
