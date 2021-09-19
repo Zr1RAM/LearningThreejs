@@ -223,7 +223,27 @@ function setLaneParameters(data) {
 }
 
 
-JSONLoader('/JSONs/OfficeFiles/officejsonfile1.json',setActorParameters);
+//JSONLoader('/JSONs/OfficeFiles/officejsonfile1.json',setActorParameters);
 // Setting actor transforms
 
+//Particle System Point Cloud 
+
+function PSPointCloud(data) {
+    data = JSON.parse(data);
+    console.log(data[0].position[0]);
+    const PSgeometry = new THREE.BufferGeometry;
+    const particlesCount = data.length;
+
+    const posArray = new Float32Array(particlesCount);
+    for(let i = 0 ; i < posArray.length ; i++) {
+        
+       // console.log(data[i]);
+    }
+    const PSmaterial = new THREE.PointsMaterial({
+        size: 0.005
+    });
+    //const pointCloud_PS = THREE.Points(PSgeometry,PSmaterial);
+}
+JSONLoader('/JSONs/samplepointcloud.json',PSPointCloud);
+//Particle System Point Cloud 
 
