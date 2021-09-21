@@ -2,7 +2,8 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import Stats from 'three/examples/jsm/libs/stats.module'
 import { GUI } from 'three/examples/jsm/libs/dat.gui.module'
-import { Mesh } from 'three';
+// import { Mesh } from 'three';
+// import { json } from 'body-parser';
 
 //import { readFileFromPath } from './FileReader'
 //import * as fs from 'fs'
@@ -219,11 +220,12 @@ function setIdentifiedObjectParameters(data) {
 
 
 function setLaneParameters(data) {
-    
+    data = JSON.parse(data);
+    console.log(data);
 }
 
 
-JSONLoader('/JSONs/OfficeFiles/officejsonfile1.json',setActorParameters);
+JSONLoader('/JSONs/OfficeFiles/lanes.json',setLaneParameters);
 // Setting actor transforms
 
 
