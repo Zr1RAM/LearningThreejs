@@ -26,6 +26,10 @@ renderer.physicallyCorrectLights = true;
 
 const controls = new OrbitControls(camera, renderer.domElement)
 
+// axis helper
+const axesHelper = new THREE.AxesHelper( 1 );
+scene.add( axesHelper );
+// axis helper
 // const geometry = new THREE.BoxGeometry()
 // const material = new THREE.MeshBasicMaterial({
 //     color: 0x00ff00,
@@ -218,13 +222,60 @@ function setIdentifiedObjectParameters(data) {
 }
 
 
-
+//temp variable
+const tempPos = new THREE.Vector3(0,0,0);
 function setLaneParameters(data) {
     data = JSON.parse(data);
-    console.log(data);
+    data = data.messages.lanes;
+    // if(!egoVehicle) {
+    //     console.log("ego vehicle not read");
+    //     return;
+    // }
+    //let frontY = [], rearY = [];
+    for (let i = 0 ; i < data.length ; i++) {
+        // front_Line_poly
+        createFrontLinePoly(data[i].right_marker.front_line_poly);
+        //rear_line_poly
+        //createRearLinePoly(data[i].right_marker.rear_line_poly);
+    }
 }
 
+function createFrontLinePoly(data) {
+    const yarray = [CalculateCubicSplineYCoordinate(data, tempPos.x),
+    CalculateCubicSplineYCoordinate(data, tempPos.x + data.range_start_m),
+    CalculateCubicSplineYCoordinate(data, tempPos.x + ((data.range_end_m - data.range_start_m)/3)),
+    CalculateCubicSplineYCoordinate(data, tempPos.x + (2 * ((data.range_end_m - data.range_start_m)/3))),
+    CalculateCubicSplineYCoordinate(data, tempPos.x + data.range_end_m)];
+    const frontLinePolyPoints = new THREE.CubicBezierCurve3(
+       // new THREE.Vector3( tempPos.x, 0, tempPos.z + yarray[0] ),
+        new THREE.Vector3( tempPos.x + data.range_start_m, 0, tempPos.z + yarray[1] ),
+        new THREE.Vector3( tempPos.x + ((data.range_end_m - data.range_start_m)/3), 0, tempPos.z + yarray[2] ),
+        new THREE.Vector3( tempPos.x + (2 * ((data.range_end_m - data.range_start_m)/3)), 0, tempPos.z + yarray[3]),
+        new THREE.Vector3( tempPos.x + data.range_end_m, 0, tempPos.z + yarray[4]),
 
+    );
+    const lanePoints = frontLinePolyPoints.getPoints( 50 );
+    const laneGeometry = new THREE.BufferGeometry().setFromPoints( lanePoints );
+    
+    const laneMaterial = new THREE.LineBasicMaterial( { color : 0xff0000 } );
+    
+    // Create the final object to add to the scene
+    const frontLinePoly = new THREE.Line( laneGeometry, laneMaterial );
+    scene.add(frontLinePoly);
+
+}
+
+function createRearLinePoly(data) {
+    console.log(data);
+
+}
+
+function CalculateCubicSplineYCoordinate(data, x)
+{
+    const { c0, c1, c2, c3 } = data;
+    const y = c0 + (c1 * x) + (c2 * Math.pow(x,2)) + (c3 * Math.pow(x,3));
+    return y;
+}
 JSONLoader('/JSONs/OfficeFiles/lanes.json',setLaneParameters);
 // Setting actor transforms
 
