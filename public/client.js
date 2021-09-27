@@ -234,34 +234,44 @@ function setLaneParameters(data) {
     //let frontY = [], rearY = [];
     for (let i = 0 ; i < data.length ; i++) {
         // front_Line_poly
-        createFrontLinePoly(data[i].right_marker.front_line_poly);
-        //rear_line_poly
+        createLanePolyLine(data[i].right_marker.front_line_poly, 0xff0000);
+        createLanePolyLine(data[i].right_marker.rear_line_poly, 0xff0000);
+        createLanePolyLine(data[i].left_marker.front_line_poly, 0x00ff00);
+        createLanePolyLine(data[i].left_marker.rear_line_poly, 0x00ff00);
+        // rear_line_poly
         //createRearLinePoly(data[i].right_marker.rear_line_poly);
     }
 }
+const intervalValue = 0.5;
+function createLanePolyLine(data, splineColor) {
+    let Intervals =  CalculateInterval(data.range_start_m,data.range_end_m);
+    console.log(Intervals);
+    if (Intervals > 0) {
+        let LaneCoordinates = [];
+        let y = CalculateCubicSplineYCoordinate(data, tempPos.x + data.range_start_m);
+        LaneCoordinates.push(
+            makeCoordinateForLaneSpline(tempPos.x + data.range_start_m, 0, y)
+        );
+        for (let i = 1; i < Intervals - 2; i++) {
+            const yCoordinate = CalculateCubicSplineYCoordinate(data, tempPos.x + data.range_start_m + (intervalValue * i));
+            LaneCoordinates.push(
+                makeCoordinateForLaneSpline(tempPos.x + data.range_start_m + (intervalValue * i), 0, yCoordinate)
+            );
+        }
+        y = CalculateCubicSplineYCoordinate(data, tempPos.x + data.range_end_m);
+        LaneCoordinates.push(
+            makeCoordinateForLaneSpline(tempPos.x + data.range_end_m, 0, y)
+        );
+        const frontLinePolyPoints = new THREE.CatmullRomCurve3(LaneCoordinates, false);
+        const lanePoints = frontLinePolyPoints.getPoints(50);
+        const laneGeometry = new THREE.BufferGeometry().setFromPoints(lanePoints);
 
-function createFrontLinePoly(data) {
-    const yarray = [CalculateCubicSplineYCoordinate(data, tempPos.x),
-    CalculateCubicSplineYCoordinate(data, tempPos.x + data.range_start_m),
-    CalculateCubicSplineYCoordinate(data, tempPos.x + ((data.range_end_m - data.range_start_m)/3)),
-    CalculateCubicSplineYCoordinate(data, tempPos.x + (2 * ((data.range_end_m - data.range_start_m)/3))),
-    CalculateCubicSplineYCoordinate(data, tempPos.x + data.range_end_m)];
-    const frontLinePolyPoints = new THREE.CubicBezierCurve3(
-       // new THREE.Vector3( tempPos.x, 0, tempPos.z + yarray[0] ),
-        new THREE.Vector3( tempPos.x + data.range_start_m, 0, tempPos.z + yarray[1] ),
-        new THREE.Vector3( tempPos.x + ((data.range_end_m - data.range_start_m)/3), 0, tempPos.z + yarray[2] ),
-        new THREE.Vector3( tempPos.x + (2 * ((data.range_end_m - data.range_start_m)/3)), 0, tempPos.z + yarray[3]),
-        new THREE.Vector3( tempPos.x + data.range_end_m, 0, tempPos.z + yarray[4]),
+        const laneMaterial = new THREE.LineBasicMaterial({ color: splineColor });
 
-    );
-    const lanePoints = frontLinePolyPoints.getPoints( 50 );
-    const laneGeometry = new THREE.BufferGeometry().setFromPoints( lanePoints );
-    
-    const laneMaterial = new THREE.LineBasicMaterial( { color : 0xff0000 } );
-    
-    // Create the final object to add to the scene
-    const frontLinePoly = new THREE.Line( laneGeometry, laneMaterial );
-    scene.add(frontLinePoly);
+        // Create the final object to add to the scene
+        const frontLinePoly = new THREE.Line(laneGeometry, laneMaterial);
+        scene.add(frontLinePoly);
+    }
 
 }
 
@@ -270,12 +280,20 @@ function createRearLinePoly(data) {
 
 }
 
+function CalculateInterval(a,b) {
+    return Math.abs((Math.floor(a) - Math.floor(b)) / intervalValue) ;
+}
+
 function CalculateCubicSplineYCoordinate(data, x)
 {
     const { c0, c1, c2, c3 } = data;
     const y = c0 + (c1 * x) + (c2 * Math.pow(x,2)) + (c3 * Math.pow(x,3));
     return y;
 }
+
+function makeCoordinateForLaneSpline(x,y,z) {
+    return new THREE.Vector3(x,y,z);
+} 
 JSONLoader('/JSONs/OfficeFiles/lanes.json',setLaneParameters);
 // Setting actor transforms
 
