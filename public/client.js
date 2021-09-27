@@ -169,6 +169,7 @@ function setEgoParameters(data) {
     if(data.objects) {
         setIdentifiedObjectParameters(data.objects);
     }
+    JSONLoader('/JSONs/OfficeFiles/lanes.json',setLaneParameters);
 }
 let egoVehicle;
 function setEgoTransform(data)
@@ -236,16 +237,15 @@ function setLaneParameters(data) {
         // front_Line_poly
         createLanePolyLine(data[i].right_marker.front_line_poly, 0xff0000);
         createLanePolyLine(data[i].right_marker.rear_line_poly, 0xff0000);
-        createLanePolyLine(data[i].left_marker.front_line_poly, 0x00ff00);
-        createLanePolyLine(data[i].left_marker.rear_line_poly, 0x00ff00);
+        //createLanePolyLine(data[i].left_marker.front_line_poly, 0x00ff00);
+        //createLanePolyLine(data[i].left_marker.rear_line_poly, 0x00ff00);
         // rear_line_poly
         //createRearLinePoly(data[i].right_marker.rear_line_poly);
     }
 }
-const intervalValue = 0.5;
+const intervalValue = 10;
 function createLanePolyLine(data, splineColor) {
     let Intervals =  CalculateInterval(data.range_start_m,data.range_end_m);
-    console.log(Intervals);
     if (Intervals > 0) {
         let LaneCoordinates = [];
         let y = CalculateCubicSplineYCoordinate(data, tempPos.x + data.range_start_m);
@@ -292,9 +292,9 @@ function CalculateCubicSplineYCoordinate(data, x)
 }
 
 function makeCoordinateForLaneSpline(x,y,z) {
-    return new THREE.Vector3(x,y,z);
+    return new THREE.Vector3(egoVehicle.position.x + x, egoVehicle.position.y + y, egoVehicle.position.z + z);
 } 
-JSONLoader('/JSONs/OfficeFiles/lanes.json',setLaneParameters);
+JSONLoader('/JSONs/OfficeFiles/ego_vehicle.json',setActorParameters);
 // Setting actor transforms
 
 
