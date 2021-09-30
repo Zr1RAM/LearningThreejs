@@ -181,7 +181,6 @@ function setEgoTransform(data)
     egoVehicle.position.set( data.pos_x_m, data.pos_z_m, data.pos_y_m );
     grid.position.set(data.pos_x_m, grid.position.y, data.pos_y_m);
     egoVehicle.rotation.y = data.ori_yaw_rad;
-    console.log(egoVehicle.position);
     updateCameraTransform(egoVehicle);
 }
 
@@ -271,6 +270,7 @@ function createLanePolyLine(data, splineColor) {
         // Create the final object to add to the scene
         const frontLinePoly = new THREE.Line(laneGeometry, laneMaterial);
         scene.add(frontLinePoly);
+        frontLinePoly.position.set(egoVehicle.position.x,egoVehicle.position.y,egoVehicle.position.z);
     }
 
 }
@@ -292,7 +292,8 @@ function CalculateCubicSplineYCoordinate(data, x)
 }
 
 function makeCoordinateForLaneSpline(x,y,z) {
-    return new THREE.Vector3(egoVehicle.position.x + x, egoVehicle.position.y + y, egoVehicle.position.z + z);
+    //return new THREE.Vector3(egoVehicle.position.x + x, egoVehicle.position.y + y, egoVehicle.position.z + z);
+    return new THREE.Vector3( x,  y,  z);
 } 
 JSONLoader('/JSONs/OfficeFiles/ego_vehicle.json',setActorParameters);
 // Setting actor transforms
