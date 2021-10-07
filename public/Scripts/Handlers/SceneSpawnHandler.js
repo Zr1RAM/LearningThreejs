@@ -26,24 +26,6 @@ function setActorParameters(data)
     }
 }
 
-function setIdentifiedObjectParameters(data) {
-    const geometry = new THREE.BoxGeometry();
-    const material = new THREE.MeshPhongMaterial({
-        color: 0x0000ff,
-        opacity: 0.5,
-        transparent: true,
-    });
-    for (let i = 0 ; i < data.length ; i++) {
-        const TrackedObject = new THREE.Mesh(geometry, material);
-        TrackedObject.name = "obj" + data[i].id;
-        sceneRef.addToScene(TrackedObject); // help me
-        TrackedObject.position.set(egoObject.egoVehicle.position.x + data[i].kinematics.pos_x_m, 
-                                   egoObject.egoVehicle.position.y + data[i].kinematics.pos_z_m, 
-                                   egoObject.egoVehicle.position.z + data[i].kinematics.pos_y_m);
-        TrackedObject.scale.set(data[i].dimensions.width_m , 1, data[i].dimensions.length_m);
-    }
-}
-
 function egoSetup(data) {
     const { messages } = data;
     if(!egoObject) {
@@ -55,7 +37,14 @@ function egoSetup(data) {
     const { egoVehicle } = egoObject;
     sceneRef.updateCameraTransform(egoVehicle);
     sceneRef.setGridPosition(egoVehicle);
-    setIdentifiedObjectParameters(data.messages.objects);
+    spawnTrackedObjects(data.messages.objects);
+}
+
+function spawnTrackedObjects(data) {
+    const trackedObjects = egoObject.setIdentifiedObjectFromParameters(data);
+    for(let i = 0 ; i < trackedObjects.length ; i++) {
+        sceneRef.addToScene(trackedObjects[i]);
+    }
 }
 
 function laneSetup(data) {
@@ -73,4 +62,3 @@ function spawnSpline(spline) {
                             egoVehicle.position.z);
     }
 }
-//sceneref.scene.add to be used here so that scene classes functions and scene.add can be used here

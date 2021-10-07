@@ -6,12 +6,12 @@ export function GetLaneFromParameters(data) {
     for (let i = 0 ; i < data.length ; i++) {
         // front_Line_poly
         LaneSpline.push(
-            createLanePolyLine(data[i].right_marker.front_line_poly, 0xff0000)
+            createLanePolyLine(data[i].right_marker.front_line_poly, 0xffffff)
         );
         //createLanePolyLine(data[i].left_marker.front_line_poly, 0x00ff00);
         // rear_line_poly
         LaneSpline.push(
-            createLanePolyLine(data[i].right_marker.rear_line_poly, 0xff0000)
+            createLanePolyLine(data[i].right_marker.rear_line_poly, 0xffffff)
         );
         //createLanePolyLine(data[i].left_marker.rear_line_poly, 0x00ff00);
     }
@@ -25,25 +25,28 @@ function createLanePolyLine(data, splineColor) {
     let frontLinePoly;
     if (Intervals > 0) {
         let LaneCoordinates = [];
-        let y = CalculateCubicSplineYCoordinate(data, tempPos.x + data.range_start_m);
+        let y = CalculateCubicSplineYCoordinate(data, tempPos.z + data.range_start_m);
         LaneCoordinates.push(
-            makeCoordinateForLaneSpline(tempPos.x + data.range_start_m, 0, y)
+            makeCoordinateForLaneSpline(y, 0, tempPos.z + data.range_start_m)
         );
         for (let i = 1; i < Intervals - 2; i++) {
-            const yCoordinate = CalculateCubicSplineYCoordinate(data, tempPos.x + data.range_start_m + (intervalValue * i));
+            const yCoordinate = CalculateCubicSplineYCoordinate(data, tempPos.z + data.range_start_m + (intervalValue * i));
             LaneCoordinates.push(
-                makeCoordinateForLaneSpline(tempPos.x + data.range_start_m + (intervalValue * i), 0, yCoordinate)
+                makeCoordinateForLaneSpline(yCoordinate, 0, tempPos.z + data.range_start_m + (intervalValue * i))
             );
         }
-        y = CalculateCubicSplineYCoordinate(data, tempPos.x + data.range_end_m);
+        y = CalculateCubicSplineYCoordinate(data, tempPos.z + data.range_end_m);
         LaneCoordinates.push(
-            makeCoordinateForLaneSpline(tempPos.x + data.range_end_m, 0, y)
+            makeCoordinateForLaneSpline(y, 0, tempPos.z + data.range_end_m)
         );
         const frontLinePolyPoints = new THREE.CatmullRomCurve3(LaneCoordinates, false);
         const lanePoints = frontLinePolyPoints.getPoints(50);
         const laneGeometry = new THREE.BufferGeometry().setFromPoints(lanePoints);
 
-        const laneMaterial = new THREE.LineBasicMaterial({ color: splineColor });
+        const laneMaterial = new THREE.LineBasicMaterial({ 
+            color: splineColor,
+            linewidth: 100
+         });
 
         // Create the final object to add to the scene
         frontLinePoly = new THREE.Line(laneGeometry, laneMaterial);

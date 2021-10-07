@@ -12,15 +12,16 @@ export default class MainScene {
         THREE.Cache.enabled = true;
         this.scene = new THREE.Scene()
         this.scene.background = new THREE.Color("rgb(75, 75, 75)");
-        this.grid = new THREE.GridHelper(10000, 5000);
-        this.scene.add(this.grid);
-        this.grid.position.y = -0.5;
+        this.initializeGrid();
         this.initializeCamera();
         this.initializeRenderer();
         //Initializing OrbitControls
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     }
-
+    initializeGrid() {
+        this.grid = new THREE.GridHelper(10000, 5000, 0x0a0401, 0x0a0401 );
+        this.scene.add(this.grid);
+    }
     initializeCamera() {
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.z = 2;
@@ -71,5 +72,11 @@ export default class MainScene {
     }
     setGridPosition(obj) {
         this.grid.position.set(obj.position.x, this.grid.position.y, obj.position.z);
+        //The following is optional and is only meant for displaying the axes for debugging purposes
+        // if (!this.axesHelper) {
+        //     this.axesHelper = new THREE.AxesHelper(5);
+        //     this.scene.add(this.axesHelper);
+        // }
+        // this.axesHelper.position.set(obj.position.x, this.grid.position.y, obj.position.z);
     }
 }
