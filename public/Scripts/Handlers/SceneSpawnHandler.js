@@ -26,15 +26,18 @@ function setActorParameters(data)
     }
 }
 
-function egoSetup(data) {
+async function egoSetup(data) {
     const { messages } = data;
+   
     if(!egoObject) {
         egoObject = new EgoVehicle(messages);
-        sceneRef.addToScene(egoObject.egoVehicle)
+        await egoObject.loadModel();
+        sceneRef.addToScene(egoObject.egoVehicle);
     } else {
         egoObject.setEgoParameters(messages);
     }
     const { egoVehicle } = egoObject;
+   
     sceneRef.updateCameraTransform(egoVehicle);
     sceneRef.setGridPosition(egoVehicle);
     spawnTrackedObjects(data.messages.objects);

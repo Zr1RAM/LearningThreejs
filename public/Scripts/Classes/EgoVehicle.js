@@ -1,9 +1,12 @@
 import * as THREE from 'three'
+import { loadModelFromPath } from 'Utils/FileReader.js'
 
 export default class EgoVehicle {
+    
     constructor(data) {
         this.setEgoParameters(data);
     }
+
     setEgoParameters(data) {
         this.setEgoTransform(data.ego);
     }
@@ -17,6 +20,8 @@ export default class EgoVehicle {
         //Default cubes have pivot at the center of the mesh.
         this.egoVehicle.position.set(data.pos_y_m, 1.670/2 , data.pos_x_m); 
         this.egoVehicle.rotation.y = data.ori_yaw_rad;
+        //this.egoVehicleModel.position.set(data.pos_y_m, 1.670/2 , data.pos_x_m);
+        //this.egoVehicleModel.rotation.y = data.ori_yaw_rad;
     }
 
     SpawnEgoVehicle() {
@@ -27,9 +32,7 @@ export default class EgoVehicle {
         });
         this.egoVehicle = new THREE.Mesh(geometry, material);
         this.egoVehicle.name = "egoVehicle";
-        // Ford Escape dimsensions as per 
-        //https://www.carsguide.com.au/ford/escape/car-dimensions/2020
-        this.egoVehicle.scale.set(1.883,1.670,4.614);
+        
     }
 
     setIdentifiedObjectFromParameters(data) {
@@ -52,13 +55,41 @@ export default class EgoVehicle {
         }
         return trackedObjects;
     }
-    //Boxhelper used for simulating the effect found in https://avs.auto/demo/index.html
+    //BoxHelper used for simulating the effect found in https://avs.auto/demo/index.html
     //Ideally this should be a custom shader or material with the right parameters for trackedObject
+    //For now BoxHelper seems to get the job done.
     createTrackedObjBoxHelper(geometry) {
         const trackedObjBoxHelper = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial(0xff0000));
         const boxHelper = new THREE.BoxHelper(trackedObjBoxHelper, 0x0092fa);
         return boxHelper;
     }
+    
+    async loadModel() {
+        // return new Promise(resolve=>loadModelFromPath(path, function (gltf) {
+        //     console.log(gltf);
+        //     this.egoVehicleModel = gltf;
+        //     resolve(gltf);
+        // }.bind(this)));
+        let model = await loadModelFromPath('/JSONs/OfficeFiles/Models/Ford_Fiesta.glb');
+       
+        model = model.scene.children[0];
+        // //TODO
+        model.scale.set(0.1,0.1,0.1);
+        this.egoVehicle.add(model);
+        // return loadModelFromPath('/JSONs/OfficeFiles/Models/Ford_Fiesta.glb').then(gltfData=>{
+        //     let model = gltfData.scene.children[0];
+        //     model.position.set(this.egoVehicle.position.x, this.egoVehicle.position.y, this.egoVehicle.position.z);
+        //     //TODO
+        //     model.scale.set(1,1,1);
+        //     this.model = model;
+        // }).catch(e=>console.log(e));
+    }
 
 }
+
+// export default async function createAndLoadEgoVehicle(data) {
+//     const ego = new EgoVehicle(data);
+//     await ego.loadModel();
+//     return ego;
+// }
 

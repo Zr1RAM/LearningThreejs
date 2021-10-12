@@ -12,7 +12,7 @@
 // }
 
 import * as THREE from 'three'
-
+import { GLTFLoader } from 'Loaders/GLTFLoader.js'
 
 
 let loader;
@@ -84,4 +84,21 @@ export function sequentialJSONLoader(paths, callback, i = 0) {
 //     );
 // }
 //Alternate sequentialJSONLoader
+let gltfLoader;
+export function loadModelFromPath(path) {
+    if(!gltfLoader) {
+        gltfLoader = new GLTFLoader();
+    }
+    return new Promise((resolve,reject)=>gltfLoader.load(path , function (gltf) {
+        // callback(gltf);
+        resolve(gltf);
+    }, function (xhr) {
 
+        console.log( ( xhr.loaded / xhr.total * 100 ) + '% of mesh loaded' );
+
+    }, function (error) {
+        reject('Error');
+        console.error( error );
+
+    } ));
+}
