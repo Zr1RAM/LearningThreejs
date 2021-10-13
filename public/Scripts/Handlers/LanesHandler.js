@@ -1,4 +1,7 @@
 import * as THREE from 'three'
+import { Line2 } from 'lines/Line2.js';
+import { LineGeometry } from 'lines/LineGeometry.js';
+import { LineMaterial } from 'lines/LineMaterial.js';
 //temp variable
 const tempPos = new THREE.Vector3(0,0,0);
 export function GetLaneFromParameters(data) {
@@ -22,7 +25,7 @@ const intervalValue = 10; //value at which intervals to take between range_start
 
 function createLanePolyLine(data, splineColor) {
     let Intervals =  CalculateInterval(data.range_start_m,data.range_end_m);
-    let frontLinePoly;
+    let laneSplinePoly;
     if (Intervals > 0) {
         let LaneCoordinates = [];
         let y = CalculateCubicSplineYCoordinate(data, tempPos.z + data.range_start_m);
@@ -39,19 +42,12 @@ function createLanePolyLine(data, splineColor) {
         LaneCoordinates.push(
             makeCoordinateForLaneSpline(y, 0, tempPos.z + data.range_end_m)
         );
-        const frontLinePolyPoints = new THREE.CatmullRomCurve3(LaneCoordinates, false);
-        const lanePoints = frontLinePolyPoints.getPoints(50);
-        const laneGeometry = new THREE.BufferGeometry().setFromPoints(lanePoints);
 
-        const laneMaterial = new THREE.LineBasicMaterial({ 
-            color: splineColor,
-            linewidth: 100
-         });
 
-        // Create the final object to add to the scene
-        frontLinePoly = new THREE.Line(laneGeometry, laneMaterial);
+        // Create the spline to be added to the scene
+        laneSplinePoly = makeSplineFromPoints(LaneCoordinates,splineColor);
     }
-    return frontLinePoly;
+    return laneSplinePoly;
 
 }
 
@@ -69,3 +65,16 @@ function CalculateCubicSplineYCoordinate(data, x)
 function makeCoordinateForLaneSpline(x,y,z) {
     return new THREE.Vector3( x,  y,  z);
 } 
+
+function makeSplineFromPoints(points,splineColor) {
+    const frontLinePolyPoints = new THREE.CatmullRomCurve3(points, false);
+    let lanePoints = frontLinePolyPoints.getPoints(50);
+    lanePoints = lanePoints.reduce((acc,l)=>acc.concat(l.toArray()),[]);
+    const laneGeometry = new LineGeometry();
+    laneGeometry.setPositions(lanePoints);
+    const laneMaterial = new LineMaterial({ 
+        color: splineColor,
+        linewidth: 0.0045
+     });
+     return new Line2(laneGeometry, laneMaterial);
+}

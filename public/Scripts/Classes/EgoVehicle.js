@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { Vector3 } from 'three';
 import { loadModelFromPath } from 'Utils/FileReader.js'
 
 export default class EgoVehicle {
@@ -32,6 +33,9 @@ export default class EgoVehicle {
         });
         this.egoVehicle = new THREE.Mesh(geometry, material);
         this.egoVehicle.name = "egoVehicle";
+        // Ford Escape dimsensions as per 
+        //https://www.carsguide.com.au/ford/escape/car-dimensions/2020
+        this.egoVehicle.scale.set(1.883,1.670,4.614);
         
     }
 
@@ -74,8 +78,10 @@ export default class EgoVehicle {
        
         model = model.scene.children[0];
         // //TODO
-        model.scale.set(0.1,0.1,0.1);
-        this.egoVehicle.add(model);
+        model.position.set(this.egoVehicle.position.x, 0, this.egoVehicle.position.z);
+        model.scale.set(0.0075, 0.0075, 0.0075);
+        model.rotation.y = this.egoVehicle.rotation.y;
+        this.egoVehicle.attach(model);
         // return loadModelFromPath('/JSONs/OfficeFiles/Models/Ford_Fiesta.glb').then(gltfData=>{
         //     let model = gltfData.scene.children[0];
         //     model.position.set(this.egoVehicle.position.x, this.egoVehicle.position.y, this.egoVehicle.position.z);
