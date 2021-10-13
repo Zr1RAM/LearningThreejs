@@ -74,10 +74,15 @@ export default class EgoVehicle {
         //     this.egoVehicleModel = gltf;
         //     resolve(gltf);
         // }.bind(this)));
+        const vehicleMaterial = new THREE.MeshBasicMaterial({
+            color: 0x383838,
+            wireframe: true,
+        });
         let model = await loadModelFromPath('/JSONs/OfficeFiles/Models/Ford_Fiesta.glb');
-       
         model = model.scene.children[0];
-        // //TODO
+        model.traverse((child) => {
+            if (child.isMesh) child.material = vehicleMaterial; // a material i created in the code earlier
+        });
         model.position.set(this.egoVehicle.position.x, 0, this.egoVehicle.position.z);
         model.scale.set(0.0075, 0.0075, 0.0075);
         model.rotation.y = this.egoVehicle.rotation.y;
