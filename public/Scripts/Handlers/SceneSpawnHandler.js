@@ -2,11 +2,11 @@ import { sequentialJSONLoader } from 'Utils/FileReader.js'
 import EgoVehicle from 'Classes/EgoVehicle.js'
 import { GetLaneFromParameters } from 'Handlers/LanesHandler.js'
 import * as THREE from 'three'
-
+import { getMillisecondsFromUnixTimestamp } from 'Utils/TimeAndFramesUtil.js'
 
 //This is a temporary solution until we can dynamically get all the file names in a path which is also a 
 //temporary solution until web socket is in place
-let paths = ['/JSONs/OfficeFiles/ego_vehicle.json','/JSONs/OfficeFiles/lanes.json'];
+let paths = ['/JSONs/OfficeFiles/ford-fusion-objects.json','/JSONs/OfficeFiles/ford-vision-lanes.json'];
 let egoObject;
 let sceneRef;
 export function UpdateSceneItems(scene) {
@@ -18,10 +18,12 @@ function setActorParameters(data)
 {
     switch (data.type) {
         case "ego": 
-            egoSetup(data);
+            //egoSetup(data);
+            console.log('message count in ego json ' + data.messages.length);
             break;
         case "lanes":
-            laneSetup(data)
+            //laneSetup(data)
+            console.log('message count in lanes json ' + data.messages.length);
             break;
     }
 }
