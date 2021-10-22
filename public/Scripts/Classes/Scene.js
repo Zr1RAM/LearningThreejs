@@ -5,7 +5,12 @@ import { GUI } from 'three/examples/jsm/libs/dat.gui.module'
 
 export default class MainScene {
     constructor() {
+        if (MainScene.instance instanceof MainScene ) {
+            return MainScene.instance;
+        }
         this.initializeScene();
+        Object.freeze(this);
+        MainScene.instance = this;
     }
 
     initializeScene() {
@@ -17,6 +22,7 @@ export default class MainScene {
         this.initializeRenderer();
         //Initializing OrbitControls
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.sceneObjects = [];
     }
     initializeGrid() {
         this.grid = new THREE.GridHelper(10000, 5000, 0x0a0401, 0x0a0401 );
@@ -52,9 +58,18 @@ export default class MainScene {
         this.controls.update();
         this.render();
         //stats.update();
-
+        this.sceneUpdate();
         requestAnimationFrame(this.tick.bind(this));
 
+    }
+
+    sceneUpdate() {
+        this.sceneObjects.forEach(obj => {
+            //console.log(obj);
+            if(obj.update) {
+                obj.update();
+            }
+        });
     }
 
     render() {
@@ -69,6 +84,9 @@ export default class MainScene {
 
     addToScene(Obj) {
         this.scene.add(Obj);
+        if (Obj.update) {
+            this.sceneObjects.push(Obj);
+        }
     }
     setGridPosition(obj) {
         this.grid.position.set(obj.position.x, this.grid.position.y, obj.position.z);

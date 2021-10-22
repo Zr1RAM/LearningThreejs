@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { Vector3 } from 'three';
 import { loadModelFromPath } from 'Utils/FileReader.js'
+import MainScene from 'Classes/Scene.js'
 
 export default class EgoVehicle {
     
@@ -9,7 +10,7 @@ export default class EgoVehicle {
     }
 
     setEgoParameters(data) {
-        this.setEgoTransform(data.ego);
+        this.setEgoTransform(data._ego);
     }
 
     setEgoTransform(data) {
@@ -19,13 +20,14 @@ export default class EgoVehicle {
         //Ideally we need a mesh with a pivot point that is on the ground level from the vehicle center
         //For now we are offsetting the height with respect to the Ford Escape height. Since 
         //Default cubes have pivot at the center of the mesh.
-        this.egoVehicle.position.set(data.pos_y_m, 1.670/2 , data.pos_x_m); 
-        this.egoVehicle.rotation.y = data.ori_yaw_rad;
+        this.egoVehicle.position.set(data._pos_y_m, 1.670/2 , data._pos_x_m); 
+        this.egoVehicle.rotation.y = data._ori_yaw_rad;
+        this.egoVehicle.update = this.update;
         //this.egoVehicleModel.position.set(data.pos_y_m, 1.670/2 , data.pos_x_m);
         //this.egoVehicleModel.rotation.y = data.ori_yaw_rad;
     }
 
-    SpawnEgoVehicle() {
+    async SpawnEgoVehicle() {
         const geometry = new THREE.BoxGeometry();
         const material = new THREE.MeshBasicMaterial({
             color: 0x00ff00,
@@ -36,6 +38,7 @@ export default class EgoVehicle {
         // Ford Escape dimsensions as per 
         //https://www.carsguide.com.au/ford/escape/car-dimensions/2020
         this.egoVehicle.scale.set(1.883,1.670,4.614);
+        await this.loadModel();
         
     }
 
@@ -51,10 +54,10 @@ export default class EgoVehicle {
             const trackedObject = new THREE.Mesh(geometry, material);
             trackedObject.name = "obj" + data[i].id;
             trackedObject.add( this.createTrackedObjBoxHelper(geometry) );
-            trackedObject.position.set(this.egoVehicle.position.x + data[i].kinematics.pos_y_m,
-                                       0.5 + data[i].kinematics.pos_z_m,
-                                       this.egoVehicle.position.z + data[i].kinematics.pos_x_m);
-            trackedObject.scale.set(data[i].dimensions.width_m, 1, data[i].dimensions.length_m);
+            trackedObject.position.set(this.egoVehicle.position.x + data[i]._kinematics._pos_y_m,
+                                       0.5 + data[i]._kinematics._pos_z_m,
+                                       this.egoVehicle.position.z + data[i]._kinematics._pos_x_m);
+            trackedObject.scale.set(data[i]._dimensions._width_m, 1, data[i]._dimensions._length_m);
             trackedObjects.push(trackedObject);
         }
         return trackedObjects;
@@ -96,6 +99,12 @@ export default class EgoVehicle {
         // }).catch(e=>console.log(e));
     }
 
+    //the update loop or tick function of this class or in this case the egovehicle
+    update() {
+        console.log('ego vehicle update');
+        //console.log(this); // this already provides egoVehicle object because of line 24
+        //this.translateZ(0.01);
+    }
 }
 
 // export default async function createAndLoadEgoVehicle(data) {
