@@ -36,7 +36,7 @@ function setActorParameters(data)
 {
     switch (data.type) {
         case "ego": 
-            egoSetup(data.messages[0]);
+            egoSetup(data);
             
             break;
         case "lanes":
@@ -51,22 +51,7 @@ async function egoSetup(data) {
    
     if(!egoObject) {
         egoObject = new EgoVehicle(data);
-        //await egoObject.loadModel();
         sceneRef.addToScene(egoObject.egoVehicle);
-    } else {
-        egoObject.setEgoParameters(data);
-    }
-    const { egoVehicle } = egoObject;
-   
-    sceneRef.updateCameraTransform(egoVehicle);
-    sceneRef.setGridPosition(egoVehicle);
-    spawnTrackedObjects(data._objects);
-}
-
-function spawnTrackedObjects(data) {
-    const trackedObjects = egoObject.setIdentifiedObjectFromParameters(data);
-    for(let i = 0 ; i < trackedObjects.length ; i++) {
-        sceneRef.addToScene(trackedObjects[i]);
     }
 }
 

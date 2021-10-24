@@ -6,11 +6,17 @@ import MainScene from 'Classes/Scene.js'
 export default class EgoVehicle {
     
     constructor(data) {
-        this.setEgoParameters(data);
+        this.sceneRef = new MainScene();
+        this.jsonIndex = 1;
+        this.data = data.messages;
+        this.setEgoParameters(this.data[0]);
     }
 
     setEgoParameters(data) {
         this.setEgoTransform(data._ego);
+        this.sceneRef.updateCameraTransform(this.egoVehicle);
+        this.sceneRef.setGridPosition(this.egoVehicle);
+        this.setIdentifiedObjectFromParameters(data._objects);
     }
 
     setEgoTransform(data) {
@@ -22,7 +28,7 @@ export default class EgoVehicle {
         //Default cubes have pivot at the center of the mesh.
         this.egoVehicle.position.set(data._pos_y_m, 1.670/2 , data._pos_x_m); 
         this.egoVehicle.rotation.y = data._ori_yaw_rad;
-        this.egoVehicle.update = this.update;
+        //console.log(this.egoVehicle.position);
         //this.egoVehicleModel.position.set(data.pos_y_m, 1.670/2 , data.pos_x_m);
         //this.egoVehicleModel.rotation.y = data.ori_yaw_rad;
     }
@@ -38,29 +44,57 @@ export default class EgoVehicle {
         // Ford Escape dimsensions as per 
         //https://www.carsguide.com.au/ford/escape/car-dimensions/2020
         this.egoVehicle.scale.set(1.883,1.670,4.614);
+        this.egoVehicle.update = this.update.bind(this);
         await this.loadModel();
         
     }
 
     setIdentifiedObjectFromParameters(data) {
-        const geometry = new THREE.BoxGeometry();
-        const material = new THREE.MeshBasicMaterial({
-            color: 0x041480,
-            opacity: 0.5,
-            transparent: true,
-        });
-        let trackedObjects = [];
-        for (let i = 0; i < data.length; i++) {
-            const trackedObject = new THREE.Mesh(geometry, material);
-            trackedObject.name = "obj" + data[i].id;
-            trackedObject.add( this.createTrackedObjBoxHelper(geometry) );
-            trackedObject.position.set(this.egoVehicle.position.x + data[i]._kinematics._pos_y_m,
-                                       0.5 + data[i]._kinematics._pos_z_m,
-                                       this.egoVehicle.position.z + data[i]._kinematics._pos_x_m);
-            trackedObject.scale.set(data[i]._dimensions._width_m, 1, data[i]._dimensions._length_m);
-            trackedObjects.push(trackedObject);
+        console.log('number of identified objects: ' + data.length);
+        if (!this.trackedObjects) {
+            this.trackedObjects = [];
+            this.identifiedObj = {};
+            this.identifiedObj.maxCount = 0;
+            this.identifiedObj.geometry = new THREE.BoxGeometry();
+            this.identifiedObj.material = new THREE.MeshBasicMaterial({
+                color: 0x041480,
+                opacity: 0.5,
+                transparent: true,
+            });
         }
-        return trackedObjects;
+        if(this.identifiedObj.maxCount < data.length) {
+            for(let i = 0 ; i < (data.length - this.identifiedObj.maxCount) ; i++)
+            {
+                this.trackedObjects.push(this.createTrackedObject(data[i]));
+            }
+            this.identifiedObj.maxCount = data.length;
+        }
+        this.updateTrackedObjects(data);
+        //return this.trackedObjects;
+    }
+    createTrackedObject(data) {
+        const trackedObject = new THREE.Mesh(this.identifiedObj.geometry, this.identifiedObj.material);
+        trackedObject.name = "obj" + data._id;
+        trackedObject.add(this.createTrackedObjBoxHelper(this.identifiedObj.geometry));
+        this.sceneRef.addToScene(trackedObject);
+        return trackedObject;
+    }
+    updateTrackedObjects(data)
+    {
+        for(let i = 0 ; i < this.identifiedObj.maxCount ; i++) {
+            if(i < data.length)
+            {
+                this.trackedObjects[i].visible = true;
+                this.trackedObjects[i].name = "obj" + data._id;
+                this.trackedObjects[i].position.set(this.egoVehicle.position.x + data[i]._kinematics._pos_y_m,
+                    0.5 + data[i]._kinematics._pos_z_m,
+                    this.egoVehicle.position.z + data[i]._kinematics._pos_x_m);
+                this.trackedObjects[i].rotation.y = data[i]._kinematics._ori_yaw_rad;
+                this.trackedObjects[i].scale.set(data[i]._dimensions._width_m, 1, data[i]._dimensions._length_m);
+            } else {
+                this.trackedObjects[i].visible = false;
+            }
+        }
     }
     //BoxHelper used for simulating the effect found in https://avs.auto/demo/index.html
     //Ideally this should be a custom shader or material with the right parameters for trackedObject
@@ -101,7 +135,17 @@ export default class EgoVehicle {
 
     //the update loop or tick function of this class or in this case the egovehicle
     update() {
-        console.log('ego vehicle update');
+        if (this.jsonIndex < this.data.length) {
+            this.setEgoTransform(this.data[this.jsonIndex]._ego);
+            this.setIdentifiedObjectFromParameters(this.data[this.jsonIndex]._objects);
+            this.jsonIndex += 1;
+            //console.log(this.jsonIndex);
+            //this.sceneRef.updateCameraTransform(this.egoVehicle);
+            // this.sceneRef.setGridPosition(this.egoVehicle);
+        } else {
+            this.jsonIndex = 0; 
+            this.sceneRef.updateCameraTransform(this.egoVehicle);
+        }
         //console.log(this); // this already provides egoVehicle object because of line 24
         //this.translateZ(0.01);
     }
