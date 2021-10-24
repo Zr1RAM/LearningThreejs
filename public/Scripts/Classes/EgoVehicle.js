@@ -52,15 +52,7 @@ export default class EgoVehicle {
     setIdentifiedObjectFromParameters(data) {
         console.log('number of identified objects: ' + data.length);
         if (!this.trackedObjects) {
-            this.trackedObjects = [];
-            this.identifiedObj = {};
-            this.identifiedObj.maxCount = 0;
-            this.identifiedObj.geometry = new THREE.BoxGeometry();
-            this.identifiedObj.material = new THREE.MeshBasicMaterial({
-                color: 0x041480,
-                opacity: 0.5,
-                transparent: true,
-            });
+            this.initializeTrackedObjects();
         }
         if(this.identifiedObj.maxCount < data.length) {
             for(let i = 0 ; i < (data.length - this.identifiedObj.maxCount) ; i++)
@@ -72,6 +64,19 @@ export default class EgoVehicle {
         this.updateTrackedObjects(data);
         //return this.trackedObjects;
     }
+
+    initializeTrackedObjects() {
+        this.trackedObjects = [];
+        this.identifiedObj = {};
+        this.identifiedObj.maxCount = 0;
+        this.identifiedObj.geometry = new THREE.BoxGeometry();
+        this.identifiedObj.material = new THREE.MeshBasicMaterial({
+            color: 0x041480,
+            opacity: 0.5,
+            transparent: true,
+        });
+    }
+
     createTrackedObject(data) {
         const trackedObject = new THREE.Mesh(this.identifiedObj.geometry, this.identifiedObj.material);
         trackedObject.name = "obj" + data._id;
@@ -79,6 +84,15 @@ export default class EgoVehicle {
         this.sceneRef.addToScene(trackedObject);
         return trackedObject;
     }
+    //BoxHelper used for simulating the effect found in https://avs.auto/demo/index.html
+    //Ideally this should be a custom shader or material with the right parameters for trackedObject
+    //For now BoxHelper seems to get the job done.
+    createTrackedObjBoxHelper(geometry) {
+        const trackedObjBoxHelper = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial(0xff0000));
+        const boxHelper = new THREE.BoxHelper(trackedObjBoxHelper, 0x0092fa);
+        return boxHelper;
+    }
+
     updateTrackedObjects(data)
     {
         for(let i = 0 ; i < this.identifiedObj.maxCount ; i++) {
@@ -96,14 +110,7 @@ export default class EgoVehicle {
             }
         }
     }
-    //BoxHelper used for simulating the effect found in https://avs.auto/demo/index.html
-    //Ideally this should be a custom shader or material with the right parameters for trackedObject
-    //For now BoxHelper seems to get the job done.
-    createTrackedObjBoxHelper(geometry) {
-        const trackedObjBoxHelper = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial(0xff0000));
-        const boxHelper = new THREE.BoxHelper(trackedObjBoxHelper, 0x0092fa);
-        return boxHelper;
-    }
+
     
     async loadModel() {
         // return new Promise(resolve=>loadModelFromPath(path, function (gltf) {
