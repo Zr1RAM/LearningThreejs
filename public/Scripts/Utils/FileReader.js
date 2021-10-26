@@ -20,34 +20,56 @@ function JSONLoader(path, callback,loadNextCallback) {
     if(!loader) {
         loader = new THREE.FileLoader();
     }
-    loader.load(
+    return new Promise((resolve,reject)=> loader.load(
         // resource URL
         path,
     
         // onLoad callback
         function ( data ) {
-            callback(JSON.parse(data));
+            if(callback) {
+                callback(JSON.parse(data));
+            }
             if(loadNextCallback) {
                 loadNextCallback();
             }
+            resolve(data);
         },
     
         // onProgress callback
         function ( xhr ) {
-            console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+            console.log( path + ' ' + (xhr.loaded / xhr.total * 100) + '% loaded' );
         },
     
         // onError callback
         function ( err ) {
             console.error( 'An error happened' );
+            reject('Error');
         }
-    );
+    ));
 }
 
 export function sequentialJSONLoader(paths, callback, i = 0) {
     if(i < paths.length) {
         JSONLoader(paths[i],callback,sequentialJSONLoader.bind(null,paths,callback,i+1));
    }
+}
+
+export function largeJSONLoader(paths, callback) {
+    let jsonLoaderPromises = [];
+    for (let i = 0 ; i < paths.length ; i++) {
+        jsonLoaderPromises.push(
+            JSONLoader(paths[i])
+        );
+    }
+    Promise.all(jsonLoaderPromises).then(data => {
+        for(let i = 0 ; i < data.length ; i++) {
+            console.log(JSON.parse(data[i]));
+            callback(JSON.parse(data[i]));
+        }
+    }).catch(e => {
+        console.log('promise reject');
+        console.log(e);
+    });
 }
 
 //Alternate sequentialJSONLoader

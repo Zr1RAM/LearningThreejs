@@ -1,33 +1,36 @@
 import { sequentialJSONLoader } from 'Utils/FileReader.js'
+import { largeJSONLoader } from 'Utils/FileReader.js'
 import EgoVehicle from 'Classes/EgoVehicle.js'
-import { GetLaneFromParameters } from 'Handlers/LanesHandler.js'
+import { GetLaneFromParameters } from 'Classes/LanesController.js'
 import * as THREE from 'three'
 import { getMillisecondsFromUnixTimestamp } from 'Utils/TimeAndFramesUtil.js'
+import LanesController from 'Classes/LanesController.js'
 
 //This is a temporary solution until we can dynamically get all the file names in a path which is also a 
 //temporary solution until web socket is in place
-let paths = ['/JSONs/OfficeFiles/ford-fusion-objects.json','/JSONs/OfficeFiles/ford-vision-lanes.json'];
+let paths = ['/JSONs/OfficeFiles/ford-vision-objects.json','/JSONs/OfficeFiles/ford-vision-lanes.json'];
 let egoObject;
 let sceneRef;
 export function UpdateSceneItems(scene) {
     sceneRef = scene;
     sequentialJSONLoader(paths,setActorParameters);
+    //largeJSONLoader(paths, setActorParameters);
 }
 let egoVehicleData;
 let lanesData;
 function getJSONInfos(data) {
     switch (data.type) {
         case "ego":
-            for (let i = 0; i < data.messages.length; i++) {
-                console.log('tracked objects count: ' + data.messages[i]._objects.length);
-            }
+            // for (let i = 0; i < data.messages.length; i++) {
+            //     console.log('tracked objects count: ' + data.messages[i]._objects.length);
+            // }
             egoVehicleData = data;
             break;
         case "lanes":
             //laneSetup(data)
-            for (let i = 0; i < data.messages.length; i++) {
-                console.log('number of lanes per message:  ' + data.messages[i]._lanes.length);
-            }
+            // for (let i = 0; i < data.messages.length; i++) {
+            //     console.log('number of lanes per message:  ' + data.messages[i]._lanes.length);
+            // }
             lanesData = data;
             break;
     }
@@ -40,7 +43,7 @@ function setActorParameters(data)
             
             break;
         case "lanes":
-           // laneSetup(data.messages[0]);
+            laneSetup(data);
             
             break;
     }
@@ -56,15 +59,17 @@ async function egoSetup(data) {
 }
 
 function laneSetup(data) {
-    let splines = GetLaneFromParameters(data.messages.lanes);
-    for(let i = 0 ; i < splines.length ; i++) {
-        spawnSpline(splines[i]);
-    }
+    const lanesController = new LanesController(data);
+    // let splines = GetLaneFromParameters(data);
+    // for(let i = 0 ; i < splines.length ; i++) {
+    //     spawnSpline(splines[i]);
+    // }
 }
 function spawnSpline(spline) {
     const { egoVehicle } = egoObject;
     if(spline) {
         sceneRef.addToScene(spline);
+        //egoVehicle.add(spline);
         spline.position.set(egoVehicle.position.x,
                             egoVehicle.position.y,
                             egoVehicle.position.z);

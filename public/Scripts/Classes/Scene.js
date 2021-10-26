@@ -58,12 +58,16 @@ export default class MainScene {
         this.controls.update();
         this.render();
         //stats.update();
-        this.sceneUpdate();
+        this.sceneUpdateLoop();
         requestAnimationFrame(this.tick.bind(this));
 
     }
 
-    sceneUpdate() {
+    render() {
+        this.renderer.render(this.scene, this.camera);
+    }
+
+    sceneUpdateLoop() {
         this.sceneObjects.forEach(obj => {
             //console.log(obj);
             if(obj.update) {
@@ -71,11 +75,7 @@ export default class MainScene {
             }
         });
     }
-
-    render() {
-        this.renderer.render(this.scene, this.camera);
-    }
-
+    //Scene Utility functions
     updateCameraTransform(targetActor) {
         this.camera.position.set(targetActor.position.x, targetActor.position.y + 5, targetActor.position.z);
         this.camera.lookAt(targetActor.position);
@@ -96,5 +96,8 @@ export default class MainScene {
         //     this.scene.add(this.axesHelper);
         // }
         // this.axesHelper.position.set(obj.position.x, this.grid.position.y, obj.position.z);
+    }
+    getSceneObjectByName(name) {
+        return this.scene.getObjectByName(name);
     }
 }
