@@ -50,7 +50,6 @@ export default class EgoVehicle {
     }
 
     setIdentifiedObjectFromParameters(data) {
-        console.log('number of identified objects: ' + data.length);
         if (!this.trackedObjects) {
             this.initializeTrackedObjects();
         }
@@ -150,8 +149,8 @@ export default class EgoVehicle {
             //this.sceneRef.updateCameraTransform(this.egoVehicle);
             // this.sceneRef.setGridPosition(this.egoVehicle);
         } else {
-            this.jsonIndex = 0; 
-            this.sceneRef.updateCameraTransform(this.egoVehicle);
+            //this.jsonIndex = 0; 
+            //this.sceneRef.updateCameraTransform(this.egoVehicle);
         }
         //console.log(this); // this already provides egoVehicle object because of line 24
         //this.translateZ(0.01);

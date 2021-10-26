@@ -1,7 +1,7 @@
 import { sequentialJSONLoader } from 'Utils/FileReader.js'
 import { largeJSONLoader } from 'Utils/FileReader.js'
 import EgoVehicle from 'Classes/EgoVehicle.js'
-import { GetLaneFromParameters } from 'Classes/LanesController.js'
+//import { GetLaneFromParameters } from 'Classes/LanesController.js'
 import * as THREE from 'three'
 import { getMillisecondsFromUnixTimestamp } from 'Utils/TimeAndFramesUtil.js'
 import LanesController from 'Classes/LanesController.js'
