@@ -17,6 +17,17 @@ export default class LanesController {
         this.updateLaneSplines(this.data[0]._lanes);
     }
 
+    update() {
+        if(this.jsonIndex < this.data.length) {
+            this.updateLaneSplines(this.data[this.jsonIndex]._lanes);
+            //console.log(this.jsonIndex);
+            this.jsonIndex += 1;
+
+        } else {
+            this.jsonIndex = 0;
+        }
+    }
+
     initializeLaneSplines() {
        this.laneFrontSplines = [];
        this.laneRearSplines = [];
@@ -60,8 +71,20 @@ export default class LanesController {
         laneSpline.geometry.attributes.position.needsUpdate = true;
         return laneSpline;
     }
-    
-    
+
+    updateLaneSplines(data)
+    {
+        for (let i = 0 ; i < data.length ; i++) {
+            this.updateLaneSplineGeometry(this.laneFrontSplines[i], 
+                this.updateLaneSplinePoints(data[i]._right_marker._front_line_poly)
+                );
+            this.updateLaneSplineGeometry(this.laneRearSplines[i], 
+                this.updateLaneSplinePoints(data[i]._right_marker._rear_line_poly)
+                );
+        }
+        this.laneSplineGroup.position.set(this.egoVehicleRef.position.x,this.egoVehicleRef.position.y,this.egoVehicleRef.position.z);
+    }
+        
     updateLaneSplineGeometry(laneSpline,vector3Points) {
         //console.log(vector3Points.length);
         if(vector3Points.length > 1) {
@@ -71,17 +94,6 @@ export default class LanesController {
             laneSpline.geometry.setPositions(lanePoints);
             // vector3Points = vector3Points.reduce((acc,l)=>acc.concat(l.toArray()),[]);
             // laneSpline.geometry.setPositions(vector3Points);
-        }
-    }
-
-    update() {
-        if(this.jsonIndex < this.data.length) {
-            this.updateLaneSplines(this.data[this.jsonIndex]._lanes);
-            //console.log(this.jsonIndex);
-            this.jsonIndex += 1;
-
-        } else {
-            this.jsonIndex = 0;
         }
     }
 
@@ -121,19 +133,6 @@ export default class LanesController {
     makeCoordinateForLaneSpline(x,y,z) {
         return new THREE.Vector3( x,  y,  z);
     } 
-
-    updateLaneSplines(data)
-    {
-        for (let i = 0 ; i < data.length ; i++) {
-            this.updateLaneSplineGeometry(this.laneFrontSplines[i], 
-                this.updateLaneSplinePoints(data[i]._right_marker._front_line_poly)
-                );
-            this.updateLaneSplineGeometry(this.laneRearSplines[i], 
-                this.updateLaneSplinePoints(data[i]._right_marker._rear_line_poly)
-                );
-        }
-        this.laneSplineGroup.position.set(this.egoVehicleRef.position.x,this.egoVehicleRef.position.y,this.egoVehicleRef.position.z);
-    }
 
 }
 // //temp variable
