@@ -24,7 +24,7 @@ export default class LanesController {
             this.jsonIndex += 1;
 
         } else {
-            this.jsonIndex = 0;
+            //this.jsonIndex = 0;
         }
     }
 
@@ -83,6 +83,7 @@ export default class LanesController {
                 );
         }
         this.laneSplineGroup.position.set(this.egoVehicleRef.position.x,this.egoVehicleRef.position.y,this.egoVehicleRef.position.z);
+        //this.laneSplineGroup.rotation.y = this.egoVehicleRef.rotation.y;
     }
         
     updateLaneSplineGeometry(laneSpline,vector3Points) {

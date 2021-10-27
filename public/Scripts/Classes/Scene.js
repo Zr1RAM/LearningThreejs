@@ -20,8 +20,7 @@ export default class MainScene {
         this.initializeGrid();
         this.initializeCamera();
         this.initializeRenderer();
-        //Initializing OrbitControls
-        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.initializeOrbitControls();
         this.sceneObjects = [];
     }
     initializeGrid() {
@@ -31,6 +30,12 @@ export default class MainScene {
     initializeCamera() {
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.z = 2;
+    }
+
+    initializeOrbitControls() {
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        //this.controls.enableRotate = false;
+        this.controls.maxDistance = 50;
     }
 
     initializeRenderer() {

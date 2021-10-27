@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Vector3 } from 'three';
+import { MathUtils, Vector3 } from 'three';
 import { loadModelFromPath } from 'Utils/FileReader.js'
 import MainScene from 'Classes/Scene.js'
 
@@ -10,6 +10,23 @@ export default class EgoVehicle {
         this.jsonIndex = 1;
         this.data = data.messages;
         this.setEgoParameters(this.data[0]);
+    }
+
+    //the update loop or tick function of this class or in this case the egovehicle
+    update() {
+        if (this.jsonIndex < this.data.length) {
+            this.setEgoTransform(this.data[this.jsonIndex]._ego);
+            this.setIdentifiedObjectFromParameters(this.data[this.jsonIndex]._objects);
+            this.jsonIndex += 1;
+            //console.log(this.jsonIndex);
+            //this.sceneRef.updateCameraTransform(this.egoVehicle);
+            // this.sceneRef.setGridPosition(this.egoVehicle);
+        } else {
+            //this.jsonIndex = 0; 
+            //this.sceneRef.updateCameraTransform(this.egoVehicle);
+        }
+        //console.log(this); // this already provides egoVehicle object because of line 24
+        //this.translateZ(0.01);
     }
 
     setEgoParameters(data) {
@@ -102,7 +119,7 @@ export default class EgoVehicle {
                 this.trackedObjects[i].position.set(this.egoVehicle.position.x + data[i]._kinematics._pos_y_m,
                     0.5 + data[i]._kinematics._pos_z_m,
                     this.egoVehicle.position.z + data[i]._kinematics._pos_x_m);
-                this.trackedObjects[i].rotation.y = data[i]._kinematics._ori_yaw_rad;
+                this.trackedObjects[i].rotation.y = this.egoVehicle.rotation.y + data[i]._kinematics._ori_yaw_rad;
                 this.trackedObjects[i].scale.set(data[i]._dimensions._width_m, 1, data[i]._dimensions._length_m);
             } else {
                 this.trackedObjects[i].visible = false;
@@ -138,23 +155,9 @@ export default class EgoVehicle {
         //     this.model = model;
         // }).catch(e=>console.log(e));
     }
-
-    //the update loop or tick function of this class or in this case the egovehicle
-    update() {
-        if (this.jsonIndex < this.data.length) {
-            this.setEgoTransform(this.data[this.jsonIndex]._ego);
-            this.setIdentifiedObjectFromParameters(this.data[this.jsonIndex]._objects);
-            this.jsonIndex += 1;
-            //console.log(this.jsonIndex);
-            //this.sceneRef.updateCameraTransform(this.egoVehicle);
-            // this.sceneRef.setGridPosition(this.egoVehicle);
-        } else {
-            //this.jsonIndex = 0; 
-            //this.sceneRef.updateCameraTransform(this.egoVehicle);
-        }
-        //console.log(this); // this already provides egoVehicle object because of line 24
-        //this.translateZ(0.01);
-    }
+    // getDegreesFromRadians(rad) {
+    //     return rad * 114.59155903;
+    // }
 }
 
 // export default async function createAndLoadEgoVehicle(data) {
