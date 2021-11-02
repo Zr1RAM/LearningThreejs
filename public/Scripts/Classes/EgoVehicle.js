@@ -1,7 +1,8 @@
-import * as THREE from 'three'
-import { MathUtils, Vector3 } from 'three';
-import { loadModelFromPath } from 'Utils/FileReader.js'
-import MainScene from 'Classes/Scene.js'
+import * as THREE from 'three';
+import { MathUtils, Object3D, Vector3 } from 'three';
+import { loadModelFromPath } from 'Utils/FileReader.js';
+import MainScene from 'Classes/Scene.js';
+import { applyFordEscapeMaterials } from 'Handlers/MaterialHandlers/FordEscapeMatHandler.js';
 
 export default class EgoVehicle {
     
@@ -10,6 +11,7 @@ export default class EgoVehicle {
         this.jsonIndex = 1;
         this.data = data.messages;
         this.setEgoParameters(this.data[0]);
+        this.sceneRef.updateCameraTransform(this.egoVehicle);
     }
 
     //the update loop or tick function of this class or in this case the egovehicle
@@ -31,7 +33,6 @@ export default class EgoVehicle {
 
     setEgoParameters(data) {
         this.setEgoTransform(data._ego);
-        this.sceneRef.updateCameraTransform(this.egoVehicle);
         this.sceneRef.setGridPosition(this.egoVehicle);
         this.setIdentifiedObjectFromParameters(data._objects);
     }
@@ -56,11 +57,12 @@ export default class EgoVehicle {
             color: 0x00ff00,
             wireframe: true,
         });
-        this.egoVehicle = new THREE.Mesh(geometry, material);
+        //this.egoVehicle = new THREE.Mesh(geometry, material);
+        this.egoVehicle =  new Object3D();
         this.egoVehicle.name = "egoVehicle";
         // Ford Escape dimsensions as per 
         //https://www.carsguide.com.au/ford/escape/car-dimensions/2020
-        this.egoVehicle.scale.set(1.883,1.670,4.614);
+        //this.egoVehicle.scale.set(1.883,1.670,4.614);
         this.egoVehicle.update = this.update.bind(this);
         await this.loadModel();
         
@@ -134,17 +136,13 @@ export default class EgoVehicle {
         //     this.egoVehicleModel = gltf;
         //     resolve(gltf);
         // }.bind(this)));
-        const vehicleMaterial = new THREE.MeshBasicMaterial({
-            color: 0x383838,
-            wireframe: true,
-        });
-        let model = await loadModelFromPath('/JSONs/OfficeFiles/Models/Ford_Fiesta.glb');
+        
+        let model = await loadModelFromPath('/JSONs/OfficeFiles/Models/FordEscape3.glb');
+        console.log(model);
         model = model.scene.children[0];
-        model.traverse((child) => {
-            if (child.isMesh) child.material = vehicleMaterial; // a material i created in the code earlier
-        });
+        applyFordEscapeMaterials(model);
         model.position.set(this.egoVehicle.position.x, 0, this.egoVehicle.position.z);
-        model.scale.set(0.0075, 0.0075, 0.0075);
+        model.scale.set(0.1, 0.1, 0.1);
         model.rotation.y = this.egoVehicle.rotation.y;
         this.egoVehicle.attach(model);
         // return loadModelFromPath('/JSONs/OfficeFiles/Models/Ford_Fiesta.glb').then(gltfData=>{

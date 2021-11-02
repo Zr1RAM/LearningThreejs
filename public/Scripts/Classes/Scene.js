@@ -35,7 +35,14 @@ export default class MainScene {
     initializeOrbitControls() {
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         //this.controls.enableRotate = false;
-        this.controls.maxDistance = 50;
+        // this.controls.enablePan = false;
+        // this.controls.autoRotate = false;
+        // this.controls.maxPolarAngle = (Math.PI / 2) - .05;
+        // this.controls.minPolarAngle = Math.PI / 4;
+        this.controls.maxDistance = 15;
+        // this.controls.enableDamping = true;
+        // this.controls.dampingFactor = 0.1;
+        // this.controls.update();
     }
 
     initializeRenderer() {
@@ -83,7 +90,7 @@ export default class MainScene {
     //Scene Utility functions
     updateCameraTransform(targetActor) {
         this.camera.position.set(targetActor.position.x, targetActor.position.y + 5, targetActor.position.z);
-        this.camera.lookAt(targetActor.position);
+        //this.camera.lookAt(targetActor.position);
         this.controls.target = targetActor.position;
     }
 

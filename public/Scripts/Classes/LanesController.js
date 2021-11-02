@@ -82,8 +82,8 @@ export default class LanesController {
                 this.updateLaneSplinePoints(data[i]._right_marker._rear_line_poly)
                 );
         }
-        this.laneSplineGroup.position.set(this.egoVehicleRef.position.x,this.egoVehicleRef.position.y,this.egoVehicleRef.position.z);
-        //this.laneSplineGroup.rotation.y = this.egoVehicleRef.rotation.y;
+        this.laneSplineGroup.position.set(this.egoVehicleRef.position.x, 0.08, this.egoVehicleRef.position.z);
+        this.laneSplineGroup.rotation.y = this.egoVehicleRef.rotation.y;
     }
         
     updateLaneSplineGeometry(laneSpline,vector3Points) {

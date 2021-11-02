@@ -5,6 +5,7 @@ import EgoVehicle from 'Classes/EgoVehicle.js'
 import * as THREE from 'three'
 import { getMillisecondsFromUnixTimestamp } from 'Utils/TimeAndFramesUtil.js'
 import LanesController from 'Classes/LanesController.js'
+import CameraController from 'Classes/CameraController.js'
 
 //This is a temporary solution until we can dynamically get all the file names in a path which is also a 
 //temporary solution until web socket is in place
@@ -13,9 +14,24 @@ let egoObject;
 let sceneRef;
 export function UpdateSceneItems(scene) {
     sceneRef = scene;
+    sceneSetup();
     sequentialJSONLoader(paths,setActorParameters);
     //largeJSONLoader(paths, setActorParameters);
 }
+function sceneSetup() {
+    sceneLightingSetup();
+    //cameraSetup();
+}
+function sceneLightingSetup()
+{
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5 );
+    sceneRef.addToScene(directionalLight);
+}
+
+function cameraSetup() {
+    const cameraController = new CameraController(sceneRef.camera);
+}
+
 let egoVehicleData;
 let lanesData;
 function getJSONInfos(data) {
