@@ -24,7 +24,8 @@ export default class LanesController {
             this.jsonIndex += 1;
 
         } else {
-            //this.jsonIndex = 0;
+            console.log('restarted');
+            this.jsonIndex = 0;
         }
     }
 

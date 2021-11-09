@@ -24,7 +24,7 @@ export default class MainScene {
         this.sceneObjects = [];
     }
     initializeGrid() {
-        this.grid = new THREE.GridHelper(10000, 5000, 0x0a0401, 0x0a0401 );
+        this.grid = new THREE.GridHelper(100000, 5000, 0x0a0401, 0x0a0401 );
         this.scene.add(this.grid);
     }
     initializeCamera() {
@@ -34,12 +34,13 @@ export default class MainScene {
 
     initializeOrbitControls() {
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-        //this.controls.enableRotate = false;
-        // this.controls.enablePan = false;
-        // this.controls.autoRotate = false;
-        // this.controls.maxPolarAngle = (Math.PI / 2) - .05;
-        // this.controls.minPolarAngle = Math.PI / 4;
-        this.controls.maxDistance = 15;
+        this.controls.enableRotate = true;
+        this.controls.enablePan = false;
+        this.controls.autoRotate = false;
+        this.controls.maxPolarAngle = 1.5;
+        this.controls.minPolarAngle = 0;
+        this.controls.minDistance = 3;
+        this.controls.maxDistance = 50;
         // this.controls.enableDamping = true;
         // this.controls.dampingFactor = 0.1;
         // this.controls.update();
@@ -67,11 +68,11 @@ export default class MainScene {
 
     // This is the tick function
     tick() {
-        this.controls.update();
-        this.render();
+        //this.controls.update();
         //stats.update();
         this.sceneUpdateLoop();
         requestAnimationFrame(this.tick.bind(this));
+        this.render();
 
     }
 
@@ -88,10 +89,20 @@ export default class MainScene {
         });
     }
     //Scene Utility functions
+    setCameraTransform(targetActor) {
+        targetActor.position.set(0,0,0);
+        this.controls.minDistance = 12;
+        this.controls.maxDistance = 50;
+        this.camera.position.set( 0, 10, 10 );
+        targetActor.add(this.camera);
+                this.controls.update(); 
+    }
+
     updateCameraTransform(targetActor) {
-        this.camera.position.set(targetActor.position.x, targetActor.position.y + 5, targetActor.position.z);
-        //this.camera.lookAt(targetActor.position);
-        this.controls.target = targetActor.position;
+        this.camera.lookAt(targetActor.position.x, targetActor.position.y + 5, targetActor.position.z);
+        //this.camera.position.set(targetActor.position.x, 2, targetActor.position.z - 2);
+       // this.camera.lookAt(targetPosition.x,targetPosition.y,targetPosition.z);
+       // this.controls.target = targetActor.position;
     }
 
     addToScene(Obj) {

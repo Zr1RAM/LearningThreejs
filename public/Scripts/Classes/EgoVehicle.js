@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { MathUtils, Object3D, Vector3 } from 'three';
 import { loadModelFromPath } from 'Utils/FileReader.js';
 import MainScene from 'Classes/Scene.js';
-import { applyFordEscapeMaterials } from 'Handlers/MaterialHandlers/FordEscapeMatHandler.js';
+//import { getEscapeTyres } from 'Handlers/MaterialHandlers/FordEscapeMatHandler.js';
 
 export default class EgoVehicle {
     
@@ -20,20 +20,19 @@ export default class EgoVehicle {
             this.setEgoTransform(this.data[this.jsonIndex]._ego);
             this.setIdentifiedObjectFromParameters(this.data[this.jsonIndex]._objects);
             this.jsonIndex += 1;
+            this.sceneRef.updateCameraTransform(this.egoVehicle);
             //console.log(this.jsonIndex);
-            //this.sceneRef.updateCameraTransform(this.egoVehicle);
+            
             // this.sceneRef.setGridPosition(this.egoVehicle);
         } else {
-            //this.jsonIndex = 0; 
-            //this.sceneRef.updateCameraTransform(this.egoVehicle);
+            console.log('restarted');
+            this.jsonIndex = 0;
         }
-        //console.log(this); // this already provides egoVehicle object because of line 24
-        //this.translateZ(0.01);
     }
 
     setEgoParameters(data) {
         this.setEgoTransform(data._ego);
-        this.sceneRef.setGridPosition(this.egoVehicle);
+        this.sceneRef.setCameraTransform(this.egoVehicle);
         this.setIdentifiedObjectFromParameters(data._objects);
     }
 
@@ -44,19 +43,23 @@ export default class EgoVehicle {
         //Ideally we need a mesh with a pivot point that is on the ground level from the vehicle center
         //For now we are offsetting the height with respect to the Ford Escape height. Since 
         //Default cubes have pivot at the center of the mesh.
-        this.egoVehicle.position.set(data._pos_y_m, 1.670/2 , data._pos_x_m); 
+        this.egoVehicle.position.set(data._pos_x_m, 1.670/2 , data._pos_y_m); 
         this.egoVehicle.rotation.y = data._ori_yaw_rad;
+        if(this.egoVehicle.children.length > 1) {
+            console.log(this.egoVehicle.children[1]);
+            this.egoVehicle.children[1].rotation.y = 3.14159;
+        }
         //console.log(this.egoVehicle.position);
         //this.egoVehicleModel.position.set(data.pos_y_m, 1.670/2 , data.pos_x_m);
         //this.egoVehicleModel.rotation.y = data.ori_yaw_rad;
     }
 
     async SpawnEgoVehicle() {
-        const geometry = new THREE.BoxGeometry();
-        const material = new THREE.MeshBasicMaterial({
-            color: 0x00ff00,
-            wireframe: true,
-        });
+        // const geometry = new THREE.BoxGeometry();
+        // const material = new THREE.MeshBasicMaterial({
+        //     color: 0x00ff00,
+        //     wireframe: true,
+        // });
         //this.egoVehicle = new THREE.Mesh(geometry, material);
         this.egoVehicle =  new Object3D();
         this.egoVehicle.name = "egoVehicle";
@@ -118,9 +121,9 @@ export default class EgoVehicle {
             {
                 this.trackedObjects[i].visible = true;
                 this.trackedObjects[i].name = "obj" + data._id;
-                this.trackedObjects[i].position.set(this.egoVehicle.position.x + data[i]._kinematics._pos_y_m,
-                    0.5 + data[i]._kinematics._pos_z_m,
-                    this.egoVehicle.position.z + data[i]._kinematics._pos_x_m);
+                const perceivedVehiclePos = this.calculatePerceivedVehiclePosition(data[i]._kinematics);
+                this.trackedObjects[i].position.set(perceivedVehiclePos.x, perceivedVehiclePos.y, perceivedVehiclePos.z);
+                /* perceived vehicle_in_map.orientation (WRT Easting) = perceived_vehicle.orientation + EgoVehicle.orientation; */
                 this.trackedObjects[i].rotation.y = this.egoVehicle.rotation.y + data[i]._kinematics._ori_yaw_rad;
                 this.trackedObjects[i].scale.set(data[i]._dimensions._width_m, 1, data[i]._dimensions._length_m);
             } else {
@@ -129,6 +132,21 @@ export default class EgoVehicle {
         }
     }
 
+    calculatePerceivedVehiclePosition(data) {
+
+        /* Formula used to calculate the tracked object position is as follows
+        perceived_vehicle_in_map.pos_x (i.e. easting) =  
+            EgoVehicle.pos_x - sin(EgoVehicle.orientation) * (perceived_vehicle.pos_y) + cos(EgoVehicle.orientation) * (perceived_vehicle.pos_x); 
+        perceived_vehicle_in_map.pos_y (i.e. northing) =  
+            EgoVehicle.pos_y +  sin(EgoVehicle.orientation) * perceived_vehicle.pos_x + cos(EgoVehicle.orientation) * (perceived_vehicle.pos_y); 
+        */
+
+        let trackedObjPos = new Vector3();
+        trackedObjPos.x = this.egoVehicle.position.x - Math.sin(this.egoVehicle.rotation.y) * data._pos_y_m + Math.cos(this.egoVehicle.rotation.y) * data._pos_x_m;
+        trackedObjPos.z =  this.egoVehicle.position.z +  Math.sin(this.egoVehicle.rotation.y) * data._pos_x_m + Math.cos(this.egoVehicle.rotation.y) * data._pos_y_m; 
+        trackedObjPos.y = 0.5;
+        return trackedObjPos;
+    }
     
     async loadModel() {
         // return new Promise(resolve=>loadModelFromPath(path, function (gltf) {
@@ -138,13 +156,16 @@ export default class EgoVehicle {
         // }.bind(this)));
         
         let model = await loadModelFromPath('/JSONs/OfficeFiles/Models/FordEscape3.glb');
-        console.log(model);
+        //console.log(model);
         model = model.scene.children[0];
-        applyFordEscapeMaterials(model);
+        console.log(model);
+        // const axesHelper = new THREE.AxesHelper(60);
+        // model.add(axesHelper);
         model.position.set(this.egoVehicle.position.x, 0, this.egoVehicle.position.z);
         model.scale.set(0.1, 0.1, 0.1);
         model.rotation.y = this.egoVehicle.rotation.y;
         this.egoVehicle.attach(model);
+        this.sceneRef.setGridPosition(this.egoVehicle);
         // return loadModelFromPath('/JSONs/OfficeFiles/Models/Ford_Fiesta.glb').then(gltfData=>{
         //     let model = gltfData.scene.children[0];
         //     model.position.set(this.egoVehicle.position.x, this.egoVehicle.position.y, this.egoVehicle.position.z);
