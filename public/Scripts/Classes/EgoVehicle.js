@@ -38,6 +38,7 @@ export default class EgoVehicle {
 
     setEgoTransform(data) {
         if (!this.egoVehicle) {
+            console.log('is this being called?')
             this.SpawnEgoVehicle();
         }
         //Ideally we need a mesh with a pivot point that is on the ground level from the vehicle center
@@ -46,7 +47,7 @@ export default class EgoVehicle {
         this.egoVehicle.position.set(data._pos_x_m, 1.670/2 , data._pos_y_m); 
         this.egoVehicle.rotation.y = data._ori_yaw_rad;
         if(this.egoVehicle.children.length > 1) {
-            console.log(this.egoVehicle.children[1]);
+            //console.log(this.egoVehicle.children[1]);
             this.egoVehicle.children[1].rotation.y = 3.14159;
         }
         //console.log(this.egoVehicle.position);
@@ -154,7 +155,6 @@ export default class EgoVehicle {
         //     this.egoVehicleModel = gltf;
         //     resolve(gltf);
         // }.bind(this)));
-        
         let model = await loadModelFromPath('/JSONs/OfficeFiles/Models/FordEscape3.glb');
         //console.log(model);
         model = model.scene.children[0];
@@ -162,7 +162,7 @@ export default class EgoVehicle {
         // const axesHelper = new THREE.AxesHelper(60);
         // model.add(axesHelper);
         model.position.set(this.egoVehicle.position.x, 0, this.egoVehicle.position.z);
-        model.scale.set(0.1, 0.1, 0.1);
+        model.scale.set(0.01, 0.01, 0.01);
         model.rotation.y = this.egoVehicle.rotation.y;
         this.egoVehicle.attach(model);
         this.sceneRef.setGridPosition(this.egoVehicle);

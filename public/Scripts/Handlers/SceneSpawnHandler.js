@@ -69,7 +69,6 @@ function setActorParameters(data)
 
 async function egoSetup(data) {
     //const { messages } = data; // used to alternatively known as messages = data.messages
-   
     if(!egoObject) {
         egoObject = new EgoVehicle(data);
         sceneRef.addToScene(egoObject.egoVehicle);
