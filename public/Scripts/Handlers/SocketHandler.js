@@ -1,7 +1,7 @@
 
 function init() {
     const socket = io();
-    socket.on('looBaloo',(data)=>console.log(`${data.objective} ${data.count} ${data.item} pleasee`));
+    socket.on('MapLanes',(data)=>console.log('row data is ' + data));
 }
 
 export default {

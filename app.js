@@ -8,25 +8,11 @@ const { Server } = require("socket.io");
 const io = new Server(server);
 
 const socketUtil = require('./server/sockets.js');
-const dbHandler = require('./server/DataBaseHandler.js');
-dbHandler.initDatabase();
+
+// DB
+const dbHandler = require('./server/DataBaseHandler.js')();
 
 
-const sequentialJSONLoader = require('./server/JSONHandler.js');
-const jsonData = sequentialJSONLoader.readFilesFromPath();
-// console.log(jsonData.ego.type);
-// console.log(jsonData.lanes.type);
-function queryCurrentEgoPosition(data) {
-    let egoPosition = {
-        x: data._pos_x_m,
-        y: data._pos_y_m
-    };
-    dbHandler.queryLanePoints(egoPosition);
-}
-
-for(let i = 0 ; i < 5/*jsonData.ego.messages.length*/ ; i++) {
-    queryCurrentEgoPosition(jsonData.ego.messages[i]._ego);
-}
 
 
 
@@ -35,14 +21,47 @@ app.use('/build/', express.static(path.join(__dirname, 'node_modules/three/build
 app.use('/jsm/', express.static(path.join(__dirname, 'node_modules/three/examples/jsm')))
 app.use('/Scripts/',express.static(path.join(__dirname, 'public/Scripts')))
 
+
+const sequentialJSONLoader = require('./server/JSONHandler.js');
+const { stringify } = require('querystring');
+const jsonData = sequentialJSONLoader.readFilesFromPath();
+// console.log(jsonData.ego.type);
+// console.log(jsonData.lanes.type);
+dbHandler.init().then(()=>{
+    for(let i = 0 ; i < 2/*jsonData.ego.messages.length*/ ; i++) {
+        queryCurrentEgoPosition(jsonData.ego.messages[i]._ego);
+    }
+});
+
+function queryCurrentEgoPosition(data) {
+    let egoPosition = {
+        x: data._pos_x_m,
+        y: data._pos_y_m
+    };
+    dbHandler.queryLanePoints(egoPosition);
+}
+
+
+
+
 io.on('connection', (socket) =>{ 
     console.log("connected");
-
-    setInterval(()=>socket.emit('looBaloo', {
-        objective : 'sugma',
-        item : 'balls',
-        count: 2
-    }),1000);
+    dbHandler.init().then(()=>{
+        for(let i = 0 ; i < 2/*jsonData.ego.messages.length*/ ; i++) {
+            queryCurrentEgoPosition(jsonData.ego.messages[i]._ego).then((MapLanePointsData) => {
+                console.log('query result ' + MapLanePointsData);
+                socket.emit('MapLanes', {
+                    MapLanePointsData
+                });
+            });
+            
+        }
+    });
+    // setInterval(()=>socket.emit('looBaloo', {
+    //     objective : 'sugma',
+    //     item : 'balls',
+    //     count: 2
+    // }),1000);
     socket.on('disconnect',()=>{
         console.log("Diconected");
     })
