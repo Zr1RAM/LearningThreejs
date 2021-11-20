@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import Stats from 'three/examples/jsm/libs/stats.module'
 import { GUI } from 'three/examples/jsm/libs/dat.gui.module'
+import DataBuffer from 'Classes/DataBuffer.js';
 
 export default class MainScene {
     constructor() {
@@ -22,7 +23,9 @@ export default class MainScene {
         this.initializeRenderer();
         this.initializeOrbitControls();
         this.sceneObjects = [];
+        this.bufferInstance = new DataBuffer();
     }
+
     initializeGrid() {
         this.grid = new THREE.GridHelper(100000, 5000, 0x0a0401, 0x0a0401 );
         this.scene.add(this.grid);
@@ -70,8 +73,11 @@ export default class MainScene {
     tick() {
         //this.controls.update();
         //stats.update();
-        this.sceneUpdateLoop();
         requestAnimationFrame(this.tick.bind(this));
+        if(!this.bufferInstance.isEmpty()) {
+            let data = this.bufferInstance.dequeue();
+            this.sceneUpdateLoop(data);
+        }
         this.render();
 
     }
@@ -80,10 +86,12 @@ export default class MainScene {
         this.renderer.render(this.scene, this.camera);
     }
 
-    sceneUpdateLoop() {
+    sceneUpdateLoop(bufferData) {
         this.sceneObjects.forEach(obj => {
-            //console.log(obj);
             if(obj.update) {
+                obj.data = bufferData[obj.bufferKey];
+                //console.log(bufferData[obj.bufferKey])
+                console.log(obj);
                 obj.update();
             }
         });

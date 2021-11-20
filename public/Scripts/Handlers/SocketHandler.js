@@ -1,7 +1,11 @@
+import DataBuffer from "Classes/DataBuffer.js";
 
 function init() {
     const socket = io();
-    socket.on('MapLanes',(data)=>console.log('row data is ' + data));
+    let buffer = new DataBuffer();
+    socket.on('frameData',(data)=>{
+        buffer.enqueue(data);
+    });
 }
 
 export default {

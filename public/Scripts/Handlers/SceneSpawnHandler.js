@@ -15,13 +15,20 @@ let sceneRef;
 export function UpdateSceneItems(scene) {
     sceneRef = scene;
     sceneSetup();
-    sequentialJSONLoader(paths,setActorParameters);
+    sceneObjectsSetup();
+    //sequentialJSONLoader(paths,setActorParameters);
     //largeJSONLoader(paths, setActorParameters);
 }
 function sceneSetup() {
     sceneLightingSetup();
     //cameraSetup();
 }
+
+function sceneObjectsSetup() {
+    egoSceneObjSetup();
+    lanesSetup();
+}
+
 function sceneLightingSetup()
 {
     const directionalLight = new THREE.DirectionalLight(0xffffff, 2 );
@@ -73,6 +80,17 @@ async function egoSetup(data) {
         egoObject = new EgoVehicle(data);
         sceneRef.addToScene(egoObject.egoVehicle);
     }
+}
+
+async function egoSceneObjSetup() {
+    if(!egoObject) {
+        egoObject = new EgoVehicle();
+        sceneRef.addToScene(egoObject.egoVehicle);
+    }
+}
+
+function lanesSetup() {
+    const lanesController = new LanesController();
 }
 
 function laneSetup(data) {

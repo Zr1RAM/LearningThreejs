@@ -6,27 +6,34 @@ import MainScene from 'Classes/Scene.js';
 
 export default class EgoVehicle {
     
-    constructor(data) {
+    bufferKey = 'ego';
+    constructor() {
         this.sceneRef = new MainScene();
         this.jsonIndex = 1;
-        this.data = data.messages;
-        this.setEgoParameters(this.data[0]);
+        // this.data = data.messages;
+        //this.setEgoParameters(this.data[0]);
+        //this.data = {};
+        this.SpawnEgoVehicle();
+        this.sceneRef.setCameraTransform(this.egoVehicle);
         this.sceneRef.updateCameraTransform(this.egoVehicle);
     }
 
     //the update loop or tick function of this class or in this case the egovehicle
     update() {
-        if (this.jsonIndex < this.data.length) {
-            this.setEgoTransform(this.data[this.jsonIndex]._ego);
-            this.setIdentifiedObjectFromParameters(this.data[this.jsonIndex]._objects);
-            this.jsonIndex += 1;
-            this.sceneRef.updateCameraTransform(this.egoVehicle);
-            //console.log(this.jsonIndex);
-            
-            // this.sceneRef.setGridPosition(this.egoVehicle);
-        } else {
-            console.log('restarted');
-            this.jsonIndex = 0;
+        if(this.egoVehicle.data != {}) {
+            console.log(this.egoVehicle.data);
+            // if (this.jsonIndex < this.data.length) {
+                this.setEgoTransform(this.egoVehicle.data._ego);
+                this.setIdentifiedObjectFromParameters(this.egoVehicle.data._objects);
+                // this.jsonIndex += 1;
+                this.sceneRef.updateCameraTransform(this.egoVehicle);
+                //console.log(this.jsonIndex);
+                
+                // this.sceneRef.setGridPosition(this.egoVehicle);
+            // } else {
+            //     console.log('restarted');
+            //     this.jsonIndex = 0;
+            // }
         }
     }
 
@@ -68,6 +75,8 @@ export default class EgoVehicle {
         //https://www.carsguide.com.au/ford/escape/car-dimensions/2020
         //this.egoVehicle.scale.set(1.883,1.670,4.614);
         this.egoVehicle.update = this.update.bind(this);
+        this.egoVehicle.bufferKey = 'ego';
+        this.egoVehicle.data = {};
         await this.loadModel();
         
     }
