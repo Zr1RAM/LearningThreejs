@@ -45,7 +45,7 @@ export default class MapLanesController {
             this.laneSplineGroup.add(...this.mapLanSplines);
             console.log('child added');
         }
-        console.log(this.laneSplineGroup.children);
+        console.log(this.laneSplineGroup.children.length);
     }
     makeSplineFromPoints(points,splineColor) {
         const laneMaterial = new LineMaterial({
@@ -59,31 +59,57 @@ export default class MapLanesController {
         laneGeometry.setPositions(lanePoints);
         const laneSpline = new Line2( laneGeometry, laneMaterial );
         laneSpline.geometry.attributes.position.needsUpdate = true;
+        this.sceneRef.addToScene(laneSpline);
         return laneSpline;
     }
 
     updateLaneSplines(data) {
-        console.log(data);
+        //console.log(data);
         const lane_ids = Object.keys(data);
-        console.log(lane_ids.length);
+        //console.log(lane_ids.length);
         // const point_id = Object.keys(data);
         // console.log(point_id.length);
         if(lane_ids.length > this.maxLaneCount) {
             for(let i = 0 ; i <  (lane_ids.length - this.maxLaneCount) ; i++) {
                 this.createNewMapLaneSpline();
             }
-            this.maxLaneCount = data.length;
+            this.maxLaneCount = lane_ids.length;
+            console.log('max count increased to ' + this.maxLaneCount);
         }
         for(let i = 0 ; i < this.maxLaneCount ; i++) {
-            if(i < data.length) {
-
+            if(i < lane_ids.length) {
+                if(data[lane_ids[i]].length > 1) {
+                    this.mapLanSplines[i].visible = true;
+                    //console.log(data[lane_ids[i]].length);
+                    //console.log(data[lane_ids[i]]);
+                    const points = [];
+                    for(let j = 0 ; j < data[lane_ids[i]].length ; j++) {
+                        //console.log(data[lane_ids[i]][j].x);
+                        points.push(new Vector3(data[lane_ids[i]][j].x, 0, data[lane_ids[i]][j].y));
+                    }
+                    this.updateLaneSplineGeometry(this.mapLanSplines[i], points);
+                }
             } else {
-
+                this.mapLanSplines[i].visible = false;
             }
         }
         //console.log(this.laneSplineGroup);
         this.laneSplineGroup.position.set(this.egoVehicleRef.position.x, this.egoVehicleRef.position.y, this.egoVehicleRef.position.z);
         this.laneSplineGroup.rotation.y = this.egoVehicleRef.rotation.y;
+        //this.laneSplineGroup.rotation.y = 0;
+        console.log('map lane render complete in current frame');
+    }
+
+    updateLaneSplineGeometry(laneSpline,vector3Points) {
+        //console.log(vector3Points.length);
+        if(vector3Points.length > 1) {
+            const laneSplinePolyPoints = new THREE.CatmullRomCurve3(vector3Points, false);
+            let lanePoints = laneSplinePolyPoints.getPoints(50);
+            lanePoints = lanePoints.reduce((acc,l)=>acc.concat(l.toArray()),[]);
+            laneSpline.geometry.setPositions(lanePoints);
+            // vector3Points = vector3Points.reduce((acc,l)=>acc.concat(l.toArray()),[]);
+            // laneSpline.geometry.setPositions(vector3Points);
+        }
     }
 
     // createPointsFromInterval(vectorA,VectorB) {
