@@ -41,8 +41,9 @@ export default class MapLanesController {
         this.mapLanSplines.push(
             this.makeSplineFromPoints(points, 0x00ff00)
         );
-        if(!this.laneSplineGroup.children) {
+        if(this.laneSplineGroup.children.length == 0) {
             this.laneSplineGroup.add(...this.mapLanSplines);
+            console.log('child added');
         }
         console.log(this.laneSplineGroup.children);
     }
@@ -62,9 +63,13 @@ export default class MapLanesController {
     }
 
     updateLaneSplines(data) {
-        console.log(data)
-        if(data.length > this.maxLaneCount) {
-            for(let i = 0 ; i <  (data.length - this.maxLaneCount) ; i++) {
+        console.log(data);
+        const lane_ids = Object.keys(data);
+        console.log(lane_ids.length);
+        // const point_id = Object.keys(data);
+        // console.log(point_id.length);
+        if(lane_ids.length > this.maxLaneCount) {
+            for(let i = 0 ; i <  (lane_ids.length - this.maxLaneCount) ; i++) {
                 this.createNewMapLaneSpline();
             }
             this.maxLaneCount = data.length;
@@ -73,10 +78,10 @@ export default class MapLanesController {
             if(i < data.length) {
 
             } else {
-                
+
             }
         }
-        console.log(this.laneSplineGroup);
+        //console.log(this.laneSplineGroup);
         this.laneSplineGroup.position.set(this.egoVehicleRef.position.x, this.egoVehicleRef.position.y, this.egoVehicleRef.position.z);
         this.laneSplineGroup.rotation.y = this.egoVehicleRef.rotation.y;
     }
