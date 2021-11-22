@@ -9,7 +9,7 @@ export default class MapLanesController {
     constructor(lanesGroupName) {
         this.sceneRef = new MainScene();
         this.egoVehicleRef = this.sceneRef.getSceneObjectByName('egoVehicle');
-        this.intervalValue = 10;
+        this.intervalValue = 5;
         this.initializeLaneSplines(lanesGroupName);
     }
 
@@ -74,5 +74,21 @@ export default class MapLanesController {
         console.log(this.laneSplineGroup);
         this.laneSplineGroup.position.set(this.egoVehicleRef.position.x, this.egoVehicleRef.position.y, this.egoVehicleRef.position.z);
         this.laneSplineGroup.rotation.y = this.egoVehicleRef.rotation.y;
+    }
+
+    createPointsFromInterval(vectorA,VectorB) {
+        const distance = vectorA.distanceTo(VectorB);
+        const intervals = distance/this.intervalValue;
+        let points = [];
+        if(intervals > 0) {
+            points.push(vectorA);
+            for(let i = 0 ; i < intervals -2 ; i++) {
+                points.push(
+                    new Vector3(vectorA.x + (this.intervalValue * i),0, vectorA.z + (this.intervalValue * i))
+                );
+            }
+            points.push(VectorB);
+        }
+        return points;
     }
 }
