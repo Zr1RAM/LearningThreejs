@@ -6,7 +6,7 @@ import MainScene from 'Classes/Scene.js';
 
 export default class EgoVehicle {
     
-    bufferKey = 'ego';
+    // bufferKey = 'ego';
     constructor() {
         this.sceneRef = new MainScene();
         this.jsonIndex = 1;
@@ -21,7 +21,7 @@ export default class EgoVehicle {
     //the update loop or tick function of this class or in this case the egovehicle
     update() {
         if(this.egoVehicle.data != {}) {
-            console.log(this.egoVehicle.data);
+           // console.log(this.egoVehicle.data);
             // if (this.jsonIndex < this.data.length) {
                 this.setEgoTransform(this.egoVehicle.data._ego);
                 this.setIdentifiedObjectFromParameters(this.egoVehicle.data._objects);

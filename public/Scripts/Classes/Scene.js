@@ -91,7 +91,7 @@ export default class MainScene {
             if(obj.update) {
                 obj.data = bufferData[obj.bufferKey];
                 //console.log(bufferData[obj.bufferKey])
-                console.log(obj);
+                //console.log(obj);
                 obj.update();
             }
         });

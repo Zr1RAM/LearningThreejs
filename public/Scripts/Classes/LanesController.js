@@ -7,22 +7,22 @@ import { Vector3 } from 'three';
 
 export default class LanesController {
 
-    bufferKey = 'lanes';
-    constructor() {
+    // bufferKey = 'lanes';
+    constructor(lanesGroupName) {
         this.sceneRef = new MainScene();
         this.egoVehicleRef = this.sceneRef.getSceneObjectByName('egoVehicle');
         //this.tempPos = new THREE.Vector3(0,0,0);
         //this.jsonIndex = 1;
         this.intervalValue = 10;
         //this.data = data.messages;
-        this.initializeLaneSplines();
+        this.initializeLaneSplines(lanesGroupName);
         //this.updateLaneSplines(this.data[0]._lanes);
     }
 
     update() {
-        if(this.data) {
+        if(this.laneSplineGroup.data) {
              // if(this.jsonIndex < this.data.length) {
-                this.updateLaneSplines(this.data._lanes);
+                this.updateLaneSplines(this.laneSplineGroup.data._lanes);
                 //console.log(this.jsonIndex);
                 //this.jsonIndex += 1;
     
@@ -33,7 +33,7 @@ export default class LanesController {
         }
     }
 
-    initializeLaneSplines() {
+    initializeLaneSplines(lanesGroupName) {
        this.laneFrontSplines = [];
        this.laneRearSplines = [];
        //this.laneCoordinates = [];
@@ -51,8 +51,10 @@ export default class LanesController {
        this.laneSplineGroup.add(...this.laneFrontSplines);
        this.laneSplineGroup.add(...this.laneRearSplines);
        this.laneSplineGroup.position.set(this.egoVehicleRef.position.x,this.egoVehicleRef.position.y,this.egoVehicleRef.position.z);
-       this.laneSplineGroup.name = "vision-lanes-group";
+       this.laneSplineGroup.name = lanesGroupName;
        this.laneSplineGroup.update = this.update.bind(this);
+       this.laneSplineGroup.bufferKey = 'lanes';
+       this.laneSplineGroup.data = {};
        this.sceneRef.addToScene(this.laneSplineGroup);
        
     }
@@ -80,6 +82,7 @@ export default class LanesController {
 
     updateLaneSplines(data)
     {
+        //console.log(data);
         for (let i = 0 ; i < data.length ; i++) {
             this.updateLaneSplineGeometry(this.laneFrontSplines[i], 
                 this.updateLaneSplinePoints(data[i]._right_marker._front_line_poly)
@@ -91,7 +94,7 @@ export default class LanesController {
         this.laneSplineGroup.position.set(this.egoVehicleRef.position.x, 0.08, this.egoVehicleRef.position.z);
         this.laneSplineGroup.rotation.y = this.egoVehicleRef.rotation.y;
     }
-        
+    
     updateLaneSplineGeometry(laneSpline,vector3Points) {
         //console.log(vector3Points.length);
         if(vector3Points.length > 1) {

@@ -6,6 +6,7 @@ import * as THREE from 'three'
 import { getMillisecondsFromUnixTimestamp } from 'Utils/TimeAndFramesUtil.js'
 import LanesController from 'Classes/LanesController.js'
 import CameraController from 'Classes/CameraController.js'
+import MapLanesController from 'Classes/MapLanesController.js'
 
 //This is a temporary solution until we can dynamically get all the file names in a path which is also a 
 //temporary solution until web socket is in place
@@ -90,7 +91,8 @@ async function egoSceneObjSetup() {
 }
 
 function lanesSetup() {
-    const lanesController = new LanesController();
+    const lanesController = new LanesController( "vision-lanes-group");
+    const mapLanesController = new MapLanesController("map-lanes-group");
 }
 
 function laneSetup(data) {

@@ -73,11 +73,32 @@ const DatabaseHandler = () => {
                     }
                     // if (row['count(*)'] != 0) {
                     //console.log(row);
-                    resolve(rows);
+                    resolve(restructureMapLaneQueryResult(rows));
                     // } 
                 });
             });
         });
+    }
+
+    function restructureMapLaneQueryResult(rows) {
+        const restructuredResult = {};
+        for(let i = 0 ; i < rows.length ; i++) {
+            if(!restructuredResult[rows[i].lane_id]) {
+                restructuredResult[rows[i].lane_id] = [{
+                    point_id : rows[i].point_id,
+                    x : rows[i].x,
+                    y : rows[i].y
+                }];
+            } else {
+                restructuredResult[rows[i].lane_id].push({
+                    point_id : rows[i].point_id,
+                    x : rows[i].x,
+                    y : rows[i].y
+                });
+            }
+        }
+        //console.log('restructured result ' + JSON.stringify(restructuredResult));
+        return restructuredResult;
     }
     // function queryLanePoints(egoPosition) {
     //     dbConnection.serialize(function() {
