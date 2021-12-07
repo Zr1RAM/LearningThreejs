@@ -10,7 +10,7 @@ import MapLanesController from 'Classes/MapLanesController.js'
 
 //This is a temporary solution until we can dynamically get all the file names in a path which is also a 
 //temporary solution until web socket is in place
-let paths = ['/JSONs/OfficeFiles/ford-vision-objects.json','/JSONs/OfficeFiles/ford-vision-lanes.json'];
+//let paths = ['/JSONs/OfficeFiles/ford-vision-objects.json','/JSONs/OfficeFiles/ford-vision-lanes.json'];
 let egoObject;
 let sceneRef;
 export function UpdateSceneItems(scene) {

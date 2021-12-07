@@ -76,6 +76,8 @@ export default class MainScene {
         requestAnimationFrame(this.tick.bind(this));
         if(!this.bufferInstance.isEmpty()) {
             let data = this.bufferInstance.dequeue();
+            console.log('New frame data starts here');
+            console.log(data);
             this.sceneUpdateLoop(data);
         }
         this.render();

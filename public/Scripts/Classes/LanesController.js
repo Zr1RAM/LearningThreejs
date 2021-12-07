@@ -4,6 +4,7 @@ import { LineGeometry } from 'lines/LineGeometry.js';
 import { LineMaterial } from 'lines/LineMaterial.js';
 import MainScene from 'Classes/Scene.js'
 import { Vector3 } from 'three';
+import { visionLanesCoordinatesConvert } from 'Utils/LogUtils.js'
 
 export default class LanesController {
 
@@ -22,6 +23,7 @@ export default class LanesController {
     update() {
         if(this.laneSplineGroup.data) {
              // if(this.jsonIndex < this.data.length) {
+                console.log(this.laneSplineGroup.data);
                 this.updateLaneSplines(this.laneSplineGroup.data._lanes);
                 //console.log(this.jsonIndex);
                 //this.jsonIndex += 1;
@@ -84,19 +86,22 @@ export default class LanesController {
     {
         //console.log(data);
         for (let i = 0 ; i < data.length ; i++) {
+            console.log((i + 1) +  ' lane: Front line points (vision lanes right marker)');
             this.updateLaneSplineGeometry(this.laneFrontSplines[i], 
                 this.updateLaneSplinePoints(data[i]._right_marker._front_line_poly)
                 );
+                console.log((i + 1) +  ' lane: Rear line points (vision lanes right marker)');
             this.updateLaneSplineGeometry(this.laneRearSplines[i], 
                 this.updateLaneSplinePoints(data[i]._right_marker._rear_line_poly)
                 );
         }
         this.laneSplineGroup.position.set(this.egoVehicleRef.position.x, 0.08, this.egoVehicleRef.position.z);
         this.laneSplineGroup.rotation.y = this.egoVehicleRef.rotation.y;
+        //this.laneSplineGroup.rotation.y = 3.14159;
     }
     
     updateLaneSplineGeometry(laneSpline,vector3Points) {
-        //console.log(vector3Points.length);
+        visionLanesCoordinatesConvert(vector3Points);
         if(vector3Points.length > 1) {
             const laneSplinePolyPoints = new THREE.CatmullRomCurve3(vector3Points, false);
             let lanePoints = laneSplinePolyPoints.getPoints(50);
@@ -104,6 +109,7 @@ export default class LanesController {
             laneSpline.geometry.setPositions(lanePoints);
             // vector3Points = vector3Points.reduce((acc,l)=>acc.concat(l.toArray()),[]);
             // laneSpline.geometry.setPositions(vector3Points);
+            //laneSpline.rotation.y = this.egoVehicleRef.rotation.y;
         }
     }
 
@@ -115,7 +121,7 @@ export default class LanesController {
             laneCoordinates.push(
                 this.makeCoordinateForLaneSpline(y, 0, data._range_start_m)
             );
-            for (let i = 0; i < intervals - 2; i++) {
+            for (let i = 1; i < intervals - 2; i++) {
                 const yCoordinate = this.calculateCubicSplineYCoordinate(data, data._range_start_m + (this.intervalValue * i));
                 laneCoordinates.push(
                     this.makeCoordinateForLaneSpline(yCoordinate, 0, data._range_start_m + (this.intervalValue * i))
@@ -125,7 +131,6 @@ export default class LanesController {
             laneCoordinates.push(
                 this.makeCoordinateForLaneSpline(y, 0, data._range_end_m)
             );
-            
         }
         return laneCoordinates;
     }

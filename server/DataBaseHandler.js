@@ -62,7 +62,7 @@ const DatabaseHandler = () => {
     function queryLanePoints(egoPosition) {
         return new Promise((resolve, reject) => {
             dbConnection.serialize(function () {
-                const getPointsQuery = `select * from Points where ((x-${egoPosition.x}) * (x-${egoPosition.x})) + ((y-${egoPosition.y}) * (y-${egoPosition.y})) <= 400 order by lane_id, point_id`;
+                const getPointsQuery = `select * from Points where ((x-${egoPosition.x}) * (x-${egoPosition.x})) + ((y-${egoPosition.y}) * (y-${egoPosition.y})) <= 10000 order by lane_id, point_id`;
                 // console.log(getPointsQuery);
                 //console.log(getPointsQuery);
                 // const getPointsQuery =   `select * from Points limit 5`;
@@ -87,19 +87,43 @@ const DatabaseHandler = () => {
                 restructuredResult[rows[i].lane_id] = [{
                     point_id : rows[i].point_id,
                     x : rows[i].x,
-                    y : rows[i].y
+                    y : rows[i].y,
+                    w : rows[i].w
                 }];
             } else {
                 restructuredResult[rows[i].lane_id].push({
                     point_id : rows[i].point_id,
                     x : rows[i].x,
-                    y : rows[i].y
+                    y : rows[i].y,
+                    w : rows[i].w
                 });
             }
         }
         //console.log('restructured result ' + JSON.stringify(restructuredResult));
         return restructuredResult;
     }
+
+    // function restructureMapLaneQueryResult(rows) {
+    //     const restructuredResult = {};
+    //     for(let i = 0 ; i < rows.length ; i++) {
+    //         if(!restructuredResult[rows[i].point_id]) {
+    //             restructuredResult[rows[i].point_id] = [{
+    //                 lane_id : rows[i].lane_id,
+    //                 x : rows[i].x,
+    //                 y : rows[i].y
+    //             }];
+    //         } else {
+    //             restructuredResult[rows[i].point_id].push({
+    //                 lane_id : rows[i].lane_id,
+    //                 x : rows[i].x,
+    //                 y : rows[i].y
+    //             });
+    //         }
+    //     }
+    //     //console.log('restructured result ' + JSON.stringify(restructuredResult));
+    //     return restructuredResult;
+    // }
+
     // function queryLanePoints(egoPosition) {
     //     dbConnection.serialize(function() {
     //         const getPointsQuery =   `select * from Points where ((x-${egoPosition.x}) * (x-${egoPosition.x})) + ((y-${egoPosition.y}) * (y-${egoPosition.y})) <= 400 order by lane_id, point_id`;

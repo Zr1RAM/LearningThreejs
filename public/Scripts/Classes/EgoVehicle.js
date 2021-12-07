@@ -27,6 +27,8 @@ export default class EgoVehicle {
                 this.setIdentifiedObjectFromParameters(this.egoVehicle.data._objects);
                 // this.jsonIndex += 1;
                 this.sceneRef.updateCameraTransform(this.egoVehicle);
+
+                
                 //console.log(this.jsonIndex);
                 
                 // this.sceneRef.setGridPosition(this.egoVehicle);
@@ -52,7 +54,9 @@ export default class EgoVehicle {
         //For now we are offsetting the height with respect to the Ford Escape height. Since 
         //Default cubes have pivot at the center of the mesh.
         this.egoVehicle.position.set(data._pos_x_m, 1.670/2 , data._pos_y_m); 
+        //this.testCube.position.set(this.egoVehicle.position.x,this.egoVehicle.position.y,this.egoVehicle.position.z);
         this.egoVehicle.rotation.y = data._ori_yaw_rad;
+        //this.testCube.rotation.y = data._ori_yaw_rad;
         if(this.egoVehicle.children.length > 1) {
             //console.log(this.egoVehicle.children[1]);
             this.egoVehicle.children[1].rotation.y = 3.14159;
@@ -77,6 +81,9 @@ export default class EgoVehicle {
         this.egoVehicle.update = this.update.bind(this);
         this.egoVehicle.bufferKey = 'ego';
         this.egoVehicle.data = {};
+        //this.testCube = new THREE.Mesh(geometry, material);
+        //this.testCube.scale.set(1.883,1.670,4.614);
+        //this.sceneRef.addToScene(this.testCube);
         await this.loadModel();
         
     }
